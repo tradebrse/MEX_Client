@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MEX_Main</class>
+ <widget class="QMainWindow" name="MEX_Main">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1444</width>
+    <height>836</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MEX - Trading Application</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QComboBox" name="cBoxProductExec">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>670</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblProductExec">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>60</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Product</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxAllProducts">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>110</y>
+      <width>81</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>All Products</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblTradingGUI">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>10</y>
+      <width>191</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>25</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Trading GUI</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnShow">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>80</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="edtComment">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>670</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="edtQuantity">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>670</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnLogOut">
+    <property name="geometry">
+     <rect>
+      <x>1350</x>
+      <y>0</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Log out</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnExecute">
+    <property name="geometry">
+     <rect>
+      <x>680</x>
+      <y>670</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Execute</string>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="tableWidgetOrderbookBid">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>130</y>
+      <width>711</width>
+      <height>351</height>
+     </rect>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <column>
+     <property name="text">
+      <string>Symbol</string>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Index</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Avg. Price</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Quantity</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Bid</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Comment</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Time</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QLabel" name="lblInfoOutput">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>700</y>
+      <width>731</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>30</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblProductShow">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>650</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Product</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBoxShowAll">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>60</y>
+      <width>81</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QRadioButton" name="radioButtonAll">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>All</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButtonMine">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Mine</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QTableWidget" name="tableWidgetOrderbookAsk">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>130</y>
+      <width>711</width>
+      <height>351</height>
+     </rect>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <column>
+     <property name="text">
+      <string>Symbol</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Index</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Avg. Price</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Quantity</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Ask</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Comment</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Time</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QLabel" name="lblQuantity">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>650</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Quantity</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBoxExecuteBidAsk">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>650</y>
+      <width>51</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QRadioButton" name="radioButtonBid">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Bid</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButtonAsk">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Ask</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLineEdit" name="edtValue">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>670</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblComment">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>650</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Comment</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="cBoxProductShow">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>80</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblValue">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>650</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Value</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblConnectionStatus">
+    <property name="geometry">
+     <rect>
+      <x>1240</x>
+      <y>60</y>
+      <width>181</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>22</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Disconnected</string>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnConnect">
+    <property name="geometry">
+     <rect>
+      <x>1140</x>
+      <y>60</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Connect</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnDisconnect">
+    <property name="geometry">
+     <rect>
+      <x>1140</x>
+      <y>90</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Disconnect</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1444</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="actionUser_Panel"/>
+    <addaction name="actionMy_Account"/>
+    <addaction name="actionTrade_Log"/>
+   </widget>
+   <addaction name="menuOptions"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionUser_Panel">
+   <property name="text">
+    <string>User Panel</string>
+   </property>
+  </action>
+  <action name="actionMy_Account">
+   <property name="text">
+    <string>My Account</string>
+   </property>
+  </action>
+  <action name="actionTrade_Log">
+   <property name="text">
+    <string>Trade Log</string>
+   </property>
+  </action>
+ </widget>
+ <tabstops>
+  <tabstop>cBoxProductShow</tabstop>
+  <tabstop>checkBoxAllProducts</tabstop>
+  <tabstop>radioButtonAll</tabstop>
+  <tabstop>radioButtonMine</tabstop>
+  <tabstop>btnShow</tabstop>
+  <tabstop>tableWidgetOrderbookBid</tabstop>
+  <tabstop>tableWidgetOrderbookAsk</tabstop>
+  <tabstop>radioButtonBid</tabstop>
+  <tabstop>radioButtonAsk</tabstop>
+  <tabstop>cBoxProductExec</tabstop>
+  <tabstop>edtValue</tabstop>
+  <tabstop>edtQuantity</tabstop>
+  <tabstop>edtComment</tabstop>
+  <tabstop>btnExecute</tabstop>
+  <tabstop>btnConnect</tabstop>
+  <tabstop>btnDisconnect</tabstop>
+  <tabstop>btnLogOut</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
