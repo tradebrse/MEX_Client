@@ -40,7 +40,7 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
 
     //Generate Products
     readProductDB();
-    generateProducts(productSymbolList, productNameList,productIndexList);
+
     //Set standard GUI options for shown products and users
     selectedProducts = "ALL";
     selectedUsers = "ALL";
@@ -56,11 +56,11 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
         query.first();
         if (query.record().value(0).toString() == "client")
         {
-            ui->actionUser_Panel->setVisible(false);
+            ui->actionAdmin_Panel->setVisible(false);
         }
         else if(query.record().value(0).toString() == "admin")
         {
-            ui->actionUser_Panel->setVisible(true);
+            ui->actionAdmin_Panel->setVisible(true);
         }
     } else
     {
@@ -68,7 +68,7 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
         QMessageBox messageBox;
         messageBox.critical(0,"Error","Could not execute query.");
         //deactivate admin user panel
-        ui->actionUser_Panel->setVisible(false);
+        ui->actionAdmin_Panel->setVisible(false);
         messageBox.show();
     }
 
@@ -77,7 +77,7 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
 
     connect(tcpClientSocket,SIGNAL(clientConnected()),this,SLOT(changeToConnected()));
     connect(tcpClientSocket,SIGNAL(clientDisconnected()),this,SLOT(changeToDisconnected()));
-    connect(tcpClientSocket,SIGNAL(serverDataToGUI(QList<MEX_Order>)), this,SLOT(updateOrderbook(QList<MEX_Order>))); ///Geht so? eigentlich QList<MEX_Order*>
+    connect(tcpClientSocket,SIGNAL(serverDataToGUI(QList<MEX_Order>)), this,SLOT(updateOrderbook(QList<MEX_Order>)));
     //Start connection
     tcpClientSocket->doConnect();
 }
@@ -136,20 +136,21 @@ void MEX_Main::logOutUser()
     this->close();
 }
 
-void MEX_Main::on_actionUser_Panel_triggered()
+void MEX_Main::on_actionAdmin_Panel_triggered()
 {
-    openUserPanel();
+    openAdminPanel();
 }
 
 //Disable main application and open 'User Panel' widget
-void MEX_Main::openUserPanel()
+void MEX_Main::openAdminPanel()
 {
-    MEX_UserPanel *userPanelWidget = new MEX_UserPanel();
-    userPanelWidget->setAttribute(Qt::WA_DeleteOnClose);
-    connect( userPanelWidget, SIGNAL(destroyed()), this, SLOT(enableWindow()));
-    connect( userPanelWidget, SIGNAL(destroyed()), this, SLOT(loadTrader()));
-    connect( this, SIGNAL(destroyed()), userPanelWidget, SLOT(close()));
-    userPanelWidget->show();
+    MEX_AdminPanel *adminPanelWidget = new MEX_AdminPanel();
+    adminPanelWidget->setAttribute(Qt::WA_DeleteOnClose);
+    connect( adminPanelWidget, SIGNAL(destroyed()), this, SLOT(enableWindow()));
+    connect( adminPanelWidget, SIGNAL(destroyed()), this, SLOT(loadTrader()));
+    connect( adminPanelWidget, SIGNAL(destroyed()), this, SLOT(readProductDB()));
+    connect( this, SIGNAL(destroyed()), adminPanelWidget, SLOT(close()));
+    adminPanelWidget->show();
     this->setDisabled(true);
 }
 
@@ -223,6 +224,7 @@ void MEX_Main::readProductDB()
     }
     ui->cBoxProductShow->addItems(productNameList);
     ui->cBoxProductExec->addItems(productNameList);
+    generateProducts(productSymbolList, productNameList,productIndexList);
 }
 
 void MEX_Main::generateProducts(QStringList symbol, QStringList name, QStringList index)
@@ -353,7 +355,7 @@ void MEX_Main::refreshTable()
     {
         for(int i = 0; i < productList.length(); i++)
         {
-                     if((*orderboookIterator).getProduct().getSymbol() == productList.value(i).getSymbol())
+            if((*orderboookIterator).getProduct().getSymbol() == productList.value(i).getSymbol())
             {
                 (*orderboookIterator).setProduct(productList.value(i));
             }

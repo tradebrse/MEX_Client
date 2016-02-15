@@ -4,7 +4,7 @@
 #include <ui_mex_main.h>
 #include <mex_tcpclientsocket.h>
 #include <mex_login.h>
-#include <mex_userpanel.h>
+#include <mex_adminpanel.h>
 #include <mex_myaccount.h>
 #include <mex_trader.h>
 #include <mex_order.h>
@@ -35,11 +35,11 @@ private slots:
 
     void logOutUser();
 
-    void openUserPanel();
+    void openAdminPanel();
 
     void openMyAccount();
 
-    void on_actionUser_Panel_triggered();
+    void on_actionAdmin_Panel_triggered();
 
     void on_actionMy_Account_triggered();
 

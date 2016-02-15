@@ -460,16 +460,16 @@
     <property name="title">
      <string>Options</string>
     </property>
-    <addaction name="actionUser_Panel"/>
+    <addaction name="actionAdmin_Panel"/>
     <addaction name="actionMy_Account"/>
     <addaction name="actionTrade_Log"/>
    </widget>
    <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionUser_Panel">
+  <action name="actionAdmin_Panel">
    <property name="text">
-    <string>User Panel</string>
+    <string>Admin Panel</string>
    </property>
   </action>
   <action name="actionMy_Account">
