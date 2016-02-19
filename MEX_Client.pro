@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     mex_order.cpp \
     mex_myaccount.cpp \
     mex_tradelog.cpp \
-    mex_adminpanel.cpp
+    mex_adminpanel.cpp \
+    mex_tablewidgetitem.cpp
 
 HEADERS  += mex_login.h \
     mex_main.h \
@@ -33,7 +34,8 @@ HEADERS  += mex_login.h \
     mex_order.h \
     mex_myaccount.h \
     mex_tradelog.h \
-    mex_adminpanel.h
+    mex_adminpanel.h \
+    mex_tablewidgetitem.h
 
 FORMS    += mex_login.ui \
     mex_main.ui \

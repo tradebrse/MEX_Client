@@ -9,6 +9,7 @@
 #include <mex_trader.h>
 #include <mex_order.h>
 #include <mex_tradelog.h>
+#include <mex_tablewidgetitem.h>
 #include <QMainWindow>
 #include <QDebug>
 #include <QVarLengthArray>
@@ -76,6 +77,10 @@ private slots:
     void changeToDisconnected();
 
     void updateOrderbook(QList<MEX_Order> currentOrderbook);
+
+    void sortAskTable(int column, Qt::SortOrder order);
+
+    void sortBidTable(int column, Qt::SortOrder order);
 
 private:
     Ui::MEX_Main *ui;

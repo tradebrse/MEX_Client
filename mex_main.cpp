@@ -8,8 +8,9 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     using namespace std;
 
     ui->setupUi(this);
-    this->showMaximized();
-    ///this->setFixedSize(this->size()); //Set fixed window size ///nötig?
+    ///this->showMaximized();
+    this->setFixedSize(this->size());
+
 
     //Set checked buttons for application start
     ui->radioButtonBid->setChecked(true);
@@ -20,9 +21,12 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     connect(ui->checkBoxAllProducts, SIGNAL(clicked(bool)), ui->cBoxProductShow, SLOT(setDisabled(bool)));
 
     //connect column clicks to sort functions
-    ///WEITERARBEITEN: SORTIERFUNKTIONEN IMPLEMENTIEREN
-    // connect(ui->tableWidgetOrderbookAsk->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(sortAskTable(int)));
-    //connect(ui->tableWidgetOrderbookBid->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(sortBidTable(int)));
+    //Order the tables by time
+    ui->tableWidgetOrderbookAsk->sortItems(6);
+    ui->tableWidgetOrderbookBid->sortItems(6);
+    //Connect column clicks to sort function
+    connect(ui->tableWidgetOrderbookAsk->horizontalHeader(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)), this, SLOT(sortAskTable(int,Qt::SortOrder)));
+    connect(ui->tableWidgetOrderbookBid->horizontalHeader(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)), this, SLOT(sortAskTable(int,Qt::SortOrder)));
 
     //Delete main window when closed on logout
     this->setAttribute(Qt::WA_DeleteOnClose);
@@ -361,6 +365,9 @@ void MEX_Main::refreshTable()
             }
         }
     }
+    //Order the tables by time
+    ui->tableWidgetOrderbookAsk->sortItems(6);
+    ui->tableWidgetOrderbookBid->sortItems(6);
     //seperate the orders and add the information to the table widgets
     for(orderboookIterator = currentOrderbook.begin(); orderboookIterator != currentOrderbook.end(); orderboookIterator++)
     {
@@ -372,11 +379,12 @@ void MEX_Main::refreshTable()
                 newRow = ui->tableWidgetOrderbookAsk->rowCount();
                 //insert new Row at end of widget
                 ui->tableWidgetOrderbookAsk->insertRow(newRow);
+               // ui->tableWidgetOrderbookAsk->setItem(
                 ui->tableWidgetOrderbookAsk->setItem(newRow, 0,new QTableWidgetItem((*orderboookIterator).getProduct().getSymbol()));
                 ui->tableWidgetOrderbookAsk->setItem(newRow, 1,new QTableWidgetItem((*orderboookIterator).getProduct().getIndex()));
-                ui->tableWidgetOrderbookAsk->setItem(newRow, 2,new QTableWidgetItem("0"));
-                ui->tableWidgetOrderbookAsk->setItem(newRow, 3,new QTableWidgetItem(QString::number((*orderboookIterator).getQuantity())));
-                ui->tableWidgetOrderbookAsk->setItem(newRow, 4,new QTableWidgetItem(QString::number((*orderboookIterator).getValue())));
+                ui->tableWidgetOrderbookAsk->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
+                ui->tableWidgetOrderbookAsk->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getQuantity())));
+                ui->tableWidgetOrderbookAsk->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getValue())));
                 ui->tableWidgetOrderbookAsk->setItem(newRow, 5,new QTableWidgetItem((*orderboookIterator).getComment()));
                 ui->tableWidgetOrderbookAsk->setItem(newRow, 6,new QTableWidgetItem((*orderboookIterator).getTime().toString("hh:mm:ss.zzz")));
             }
@@ -390,9 +398,9 @@ void MEX_Main::refreshTable()
                 ui->tableWidgetOrderbookBid->insertRow(newRow);
                 ui->tableWidgetOrderbookBid->setItem(newRow, 0,new QTableWidgetItem((*orderboookIterator).getProduct().getSymbol()));
                 ui->tableWidgetOrderbookBid->setItem(newRow, 1,new QTableWidgetItem((*orderboookIterator).getProduct().getIndex()));
-                ui->tableWidgetOrderbookBid->setItem(newRow, 2,new QTableWidgetItem("0"));
-                ui->tableWidgetOrderbookBid->setItem(newRow, 3,new QTableWidgetItem(QString::number((*orderboookIterator).getQuantity())));
-                ui->tableWidgetOrderbookBid->setItem(newRow, 4,new QTableWidgetItem(QString::number((*orderboookIterator).getValue())));
+                ui->tableWidgetOrderbookBid->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
+                ui->tableWidgetOrderbookBid->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getQuantity())));
+                ui->tableWidgetOrderbookBid->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getValue())));
                 ui->tableWidgetOrderbookBid->setItem(newRow, 5,new QTableWidgetItem((*orderboookIterator).getComment()));
                 ui->tableWidgetOrderbookBid->setItem(newRow, 6,new QTableWidgetItem((*orderboookIterator).getTime().toString("hh:mm:ss.zzz")));
             }
@@ -400,8 +408,16 @@ void MEX_Main::refreshTable()
     }
 }
 
-///Sortierfunktion für widgets und Price-Time Sortierung(Als Standard?) bzw match
+//Sort tables by given column
+void MEX_Main::sortAskTable(int column, Qt::SortOrder order)
+{
+    ui->tableWidgetOrderbookAsk->sortItems(column,order);
+}
 
+void MEX_Main::sortBidTable(int column, Qt::SortOrder order)
+{
+    ui->tableWidgetOrderbookBid->sortItems(column,order);
+}
 
 //SQL database query execution
 QSqlQuery MEX_Main::executeQuery (QString sqlCommand, bool &ok)

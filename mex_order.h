@@ -43,6 +43,4 @@ private:
     MEX_Product product;
 
 };
-Q_DECLARE_METATYPE(MEX_Order)
-
-#endif // MEX_ORDER_H
+#endif //MEX_ORDER_H
