@@ -45,6 +45,26 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     //Generate Products
     readProductDB();
 
+
+    //Set indices in GUI
+    QStringList distinctProductIndexList;
+    for(int i = 0; i < productIndexList.length(); i++)
+    {
+        if(!distinctProductIndexList.contains(productIndexList.value(i)))
+        {
+            distinctProductIndexList.append(productIndexList.value(i));
+            ui->cBoxIndexShow->addItem(productIndexList.value(i));
+            ui->cBoxIndexExec->addItem(productIndexList.value(i));
+        }
+    }
+    ui->cBoxIndexShow->model()->sort(0);
+    ui->cBoxIndexExec->model()->sort(0);
+    ui->cBoxIndexShow->setCurrentIndex(0);
+    ui->cBoxIndexExec->setCurrentIndex(0);
+
+    connect(ui->cBoxIndexExec, SIGNAL(currentTextChanged(QString)), this, SLOT(readProductDB(QString)));
+    connect(ui->cBoxIndexShow, SIGNAL(currentTextChanged(QString)), this, SLOT(readProductDB(QString)));
+
     //Set standard GUI options for shown products and users
     selectedProducts = "ALL";
     selectedUsers = "ALL";
@@ -198,15 +218,34 @@ void MEX_Main::enableWindow()
 }
 
 //Read products from db and load into GUI
-void MEX_Main::readProductDB()
+void MEX_Main::readProductDB(QString index)
 {
+
+    if(ui->cBoxIndexShow->currentText() != index)
+    {
+        ui->cBoxIndexShow->blockSignals(true);
+        ui->cBoxIndexShow->setCurrentText(index);
+        ui->cBoxIndexShow->blockSignals(false);
+    }
+    else if(ui->cBoxIndexExec->currentText() != index)
+    {
+        ui->cBoxIndexExec->blockSignals(true);
+        ui->cBoxIndexExec->setCurrentText(index);
+        ui->cBoxIndexExec->blockSignals(false);
+    }
+
+
     bool ok = false;
-    QString sqlCommand = "SELECT symbol,name,indexName FROM productList";
+    QString sqlCommand = "SELECT symbol,name,indexName FROM productList ORDER BY name ASC";
     QSqlQuery query(db);
     query  = executeQuery(sqlCommand, ok);
 
     if (ok)
     {
+        //Clear old lists
+        productSymbolList.clear();
+        productNameList.clear();
+        productIndexList.clear();
         //go to first line
         ok = query.first();
         //While there is a next line:
@@ -222,17 +261,25 @@ void MEX_Main::readProductDB()
     else
     {
         //Error while executing SQL-Statement
-        QMessageBox messageBox;
-        messageBox.critical(0,"Error","Could not execute query.");
-        messageBox.show();
+        QMessageBox::critical(0,"Error","Could not execute query.");
     }
-    ui->cBoxProductShow->addItems(productNameList);
-    ui->cBoxProductExec->addItems(productNameList);
+    qDebug() << index;
+    ui->cBoxProductExec->clear();
+    ui->cBoxProductShow->clear();
     generateProducts(productSymbolList, productNameList,productIndexList);
+    for(int i = 0; i < productList.length(); i++)
+    {
+        if(productList.value(i).getIndex() == index)
+        {
+            ui->cBoxProductShow->addItem(productList.value(i).getName());
+            ui->cBoxProductExec->addItem(productList.value(i).getName());
+        }
+    }
 }
 
 void MEX_Main::generateProducts(QStringList symbol, QStringList name, QStringList index)
 {
+    productList.clear();
     for (int i = 0; i < symbol.size(); ++i)
     {
         product.setName(name.value(i));
@@ -299,9 +346,21 @@ void MEX_Main::executeOrder()
         ordertype = "BID";
     }
 
-    ///currentIndex Methode zur Erkennung des Products muss später noch geändert werden, wenn GUI product in indices aufteilt
-    ///AM besten SQL SELECT symbol WHERE name = 'ui->cBoxProductExec->currentText()' ?
-    QString productSymbol = productList.value(ui->cBoxProductExec->currentIndex()).getSymbol();
+    bool ok = false;
+    QString   sqlCommand = "SELECT symbol FROM productList WHERE name = '" + ui->cBoxProductExec->currentText() + "' ";
+    QSqlQuery query(db);
+    query  = executeQuery(sqlCommand, ok);
+    QString productSymbol;
+    if (ok)
+    {
+        query.first();
+        productSymbol = query.record().value(0).toString();
+    }
+    else
+    {
+        //Error while executing SQL-Statement
+        QMessageBox::critical(0,"Error","Could not execute query.");
+    }
     int value = ui->edtValue->text().toInt();
     int quantity = ui->edtQuantity->text().toInt();
     QString comment = ui->edtComment->text();
@@ -373,13 +432,13 @@ void MEX_Main::refreshTable()
     {
         if((*orderboookIterator).getOrdertype() == "ASK")
         {
-            if((selectedProducts == "ALL" || selectedProducts == (*orderboookIterator).getProduct().getName()) && (selectedUsers == "ALL" || selectedUsers == (*orderboookIterator).getTraderID()))
+            if((selectedProducts == "ALL" || selectedProducts == (*orderboookIterator).getProduct().getName()) && (selectedUsers == "ALL" || selectedUsers == (*orderboookIterator).getTraderID()) && (ui->cBoxIndexShow->currentText() == (*orderboookIterator).getProduct().getIndex()))
             {
                 //Count number of rows
                 newRow = ui->tableWidgetOrderbookAsk->rowCount();
                 //insert new Row at end of widget
                 ui->tableWidgetOrderbookAsk->insertRow(newRow);
-               // ui->tableWidgetOrderbookAsk->setItem(
+                // ui->tableWidgetOrderbookAsk->setItem(
                 ui->tableWidgetOrderbookAsk->setItem(newRow, 0,new QTableWidgetItem((*orderboookIterator).getProduct().getSymbol()));
                 ui->tableWidgetOrderbookAsk->setItem(newRow, 1,new QTableWidgetItem((*orderboookIterator).getProduct().getIndex()));
                 ui->tableWidgetOrderbookAsk->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
@@ -391,7 +450,7 @@ void MEX_Main::refreshTable()
         }
         else if((*orderboookIterator).getOrdertype() == "BID")
         {
-            if((selectedProducts == "ALL" || selectedProducts == (*orderboookIterator).getProduct().getName()) && (selectedUsers == "ALL" || selectedUsers == (*orderboookIterator).getTraderID()))
+            if((selectedProducts == "ALL" || selectedProducts == (*orderboookIterator).getProduct().getName()) && (selectedUsers == "ALL" || selectedUsers == (*orderboookIterator).getTraderID()) && (ui->cBoxIndexShow->currentText() == (*orderboookIterator).getProduct().getIndex()))
             {
                 newRow = ui->tableWidgetOrderbookBid->rowCount();
 

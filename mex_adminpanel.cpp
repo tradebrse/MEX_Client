@@ -254,7 +254,7 @@ void MEX_AdminPanel::loadProductList()
     productNameList.clear();
     productSymbolList.clear();
     bool ok = false;
-    QString sqlCommand = "SELECT symbol,name,indexName FROM productList";
+    QString sqlCommand = "SELECT symbol,name,indexName FROM productList ORDER BY indexName ASC, name ASC";
     QSqlQuery query(db);
     query = executeQuery(sqlCommand, ok);
     if (ok)

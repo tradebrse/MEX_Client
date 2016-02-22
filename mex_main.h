@@ -50,7 +50,7 @@ private slots:
 
     QSqlQuery executeQuery(QString, bool&);
 
-    void readProductDB();
+    void readProductDB(QString index = "DAX");
 
     void generateProducts(QStringList, QStringList, QStringList);
 

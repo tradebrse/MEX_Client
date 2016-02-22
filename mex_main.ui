@@ -17,17 +17,20 @@
    <widget class="QComboBox" name="cBoxProductExec">
     <property name="geometry">
      <rect>
-      <x>110</x>
+      <x>200</x>
       <y>670</y>
-      <width>111</width>
+      <width>191</width>
       <height>22</height>
      </rect>
     </property>
+    <property name="editable">
+     <bool>true</bool>
+    </property>
    </widget>
-   <widget class="QLabel" name="lblProductExec">
+   <widget class="QLabel" name="lblProductShow">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>80</x>
       <y>60</y>
       <width>71</width>
       <height>16</height>
@@ -40,7 +43,7 @@
    <widget class="QCheckBox" name="checkBoxAllProducts">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>80</x>
       <y>110</y>
       <width>81</width>
       <height>17</height>
@@ -71,7 +74,7 @@
    <widget class="QPushButton" name="btnShow">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>380</x>
       <y>80</y>
       <width>75</width>
       <height>23</height>
@@ -84,7 +87,7 @@
    <widget class="QLineEdit" name="edtComment">
     <property name="geometry">
      <rect>
-      <x>550</x>
+      <x>730</x>
       <y>670</y>
       <width>113</width>
       <height>20</height>
@@ -94,7 +97,7 @@
    <widget class="QLineEdit" name="edtQuantity">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>580</x>
       <y>670</y>
       <width>113</width>
       <height>20</height>
@@ -117,7 +120,7 @@
    <widget class="QPushButton" name="btnExecute">
     <property name="geometry">
      <rect>
-      <x>680</x>
+      <x>860</x>
       <y>670</y>
       <width>75</width>
       <height>23</height>
@@ -189,28 +192,10 @@
      </property>
     </column>
    </widget>
-   <widget class="QLabel" name="lblInfoOutput">
+   <widget class="QLabel" name="lblProductExec">
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>700</y>
-      <width>731</width>
-      <height>71</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>30</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QLabel" name="lblProductShow">
-    <property name="geometry">
-     <rect>
-      <x>110</x>
+      <x>200</x>
       <y>650</y>
       <width>71</width>
       <height>16</height>
@@ -223,7 +208,7 @@
    <widget class="QGroupBox" name="groupBoxShowAll">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>290</x>
       <y>60</y>
       <width>81</width>
       <height>61</height>
@@ -235,9 +220,9 @@
     <widget class="QRadioButton" name="radioButtonAll">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>10</y>
-       <width>82</width>
+       <width>41</width>
        <height>17</height>
       </rect>
      </property>
@@ -248,9 +233,9 @@
     <widget class="QRadioButton" name="radioButtonMine">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>40</y>
-       <width>82</width>
+       <width>41</width>
        <height>17</height>
       </rect>
      </property>
@@ -313,7 +298,7 @@
    <widget class="QLabel" name="lblQuantity">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>580</x>
       <y>650</y>
       <width>71</width>
       <height>16</height>
@@ -365,7 +350,7 @@
    <widget class="QLineEdit" name="edtValue">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>430</x>
       <y>670</y>
       <width>113</width>
       <height>20</height>
@@ -375,7 +360,7 @@
    <widget class="QLabel" name="lblComment">
     <property name="geometry">
      <rect>
-      <x>550</x>
+      <x>730</x>
       <y>650</y>
       <width>71</width>
       <height>16</height>
@@ -391,17 +376,20 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>80</x>
       <y>80</y>
-      <width>111</width>
+      <width>201</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="editable">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLabel" name="lblValue">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>430</x>
       <y>650</y>
       <width>71</width>
       <height>16</height>
@@ -458,6 +446,85 @@
      <string>Disconnect</string>
     </property>
    </widget>
+   <widget class="QComboBox" name="cBoxIndexExec">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>670</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="editable">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblIndexExec">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>650</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Index</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblIndexShow">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>60</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Index</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="cBoxIndexShow">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>80</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="editable">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <zorder>cBoxProductExec</zorder>
+   <zorder>lblProductShow</zorder>
+   <zorder>checkBoxAllProducts</zorder>
+   <zorder>lblTradingGUI</zorder>
+   <zorder>btnShow</zorder>
+   <zorder>edtComment</zorder>
+   <zorder>edtQuantity</zorder>
+   <zorder>btnLogOut</zorder>
+   <zorder>btnExecute</zorder>
+   <zorder>tableWidgetOrderbookBid</zorder>
+   <zorder>lblProductExec</zorder>
+   <zorder>groupBoxShowAll</zorder>
+   <zorder>tableWidgetOrderbookAsk</zorder>
+   <zorder>lblQuantity</zorder>
+   <zorder>groupBoxExecuteBidAsk</zorder>
+   <zorder>edtValue</zorder>
+   <zorder>lblComment</zorder>
+   <zorder>cBoxProductShow</zorder>
+   <zorder>lblValue</zorder>
+   <zorder>lblConnectionStatus</zorder>
+   <zorder>btnConnect</zorder>
+   <zorder>btnDisconnect</zorder>
+   <zorder>cBoxIndexExec</zorder>
+   <zorder>lblIndexExec</zorder>
+   <zorder>lblIndexShow</zorder>
+   <zorder>cBoxIndexShow</zorder>
+   <zorder>radioButtonAll</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
