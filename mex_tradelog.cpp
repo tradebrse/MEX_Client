@@ -1,7 +1,7 @@
 #include "mex_tradelog.h"
 #include "ui_mex_tradelog.h"
 
-MEX_TradeLog::MEX_TradeLog(QList<MEX_Order*>& matchedOrders, QString& userID, QWidget *parent) :
+MEX_TradeLog::MEX_TradeLog(QList<MEX_Order>& myOrders, QString& userID, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MEX_TradeLog)
 {
@@ -15,21 +15,21 @@ MEX_TradeLog::MEX_TradeLog(QList<MEX_Order*>& matchedOrders, QString& userID, QW
     {
         ui->tableWidgetMatchedOrders->removeRow(0); //Remove all current rows from tablewidget
     }
-    QList<MEX_Order*>::iterator j;
+    QList<MEX_Order>::iterator j;
 
-    for(j = matchedOrders.begin(); j != matchedOrders.end(); j++)
+    for(j = myOrders.begin(); j != myOrders.end(); j++)
     {
-        if((*j)->getTraderID() == userID){
+        if((*j).getTraderID() == userID){
             newRow = ui->tableWidgetMatchedOrders->rowCount();
 
             ui->tableWidgetMatchedOrders->insertRow(newRow);
-            ui->tableWidgetMatchedOrders->setItem(newRow, 0,new QTableWidgetItem((*j)->getProduct().getSymbol()));
-            ui->tableWidgetMatchedOrders->setItem(newRow, 1,new QTableWidgetItem((*j)->getProduct().getIndex()));
+            ui->tableWidgetMatchedOrders->setItem(newRow, 0,new QTableWidgetItem((*j).getProduct().getSymbol()));
+            ui->tableWidgetMatchedOrders->setItem(newRow, 1,new QTableWidgetItem((*j).getProduct().getIndex()));
             ui->tableWidgetMatchedOrders->setItem(newRow, 2,new QTableWidgetItem("0"));
-            ui->tableWidgetMatchedOrders->setItem(newRow, 3,new QTableWidgetItem(QString::number((*j)->getQuantity())));
-            ui->tableWidgetMatchedOrders->setItem(newRow, 4,new QTableWidgetItem(QString::number((*j)->getValue())));
-            ui->tableWidgetMatchedOrders->setItem(newRow, 5,new QTableWidgetItem((*j)->getComment()));
-            ui->tableWidgetMatchedOrders->setItem(newRow, 6,new QTableWidgetItem((*j)->getTime().toString("hh:mm:ss.zzz")));
+            ui->tableWidgetMatchedOrders->setItem(newRow, 3,new QTableWidgetItem(QString::number((*j).getQuantity())));
+            ui->tableWidgetMatchedOrders->setItem(newRow, 4,new QTableWidgetItem(QString::number((*j).getValue())));
+            ui->tableWidgetMatchedOrders->setItem(newRow, 5,new QTableWidgetItem((*j).getComment()));
+            ui->tableWidgetMatchedOrders->setItem(newRow, 6,new QTableWidgetItem((*j).getTime().toString("hh:mm:ss.zzz")));
         }
     }
 }

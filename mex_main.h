@@ -78,9 +78,9 @@ private slots:
 
     void updateOrderbook(QList<MEX_Order> currentOrderbook);
 
-    void sortAskTable(int column, Qt::SortOrder order);
+    void sortSellTable(int column, Qt::SortOrder order);
 
-    void sortBidTable(int column, Qt::SortOrder order);
+    void sortBuyTable(int column, Qt::SortOrder order);
 
 private:
     Ui::MEX_Main *ui;
@@ -126,6 +126,8 @@ private:
 
     QString selectedProducts;
     QString selectedUsers;
+
+    QList<MEX_Order> myOrders;
 protected:
 
 };

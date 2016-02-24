@@ -13,7 +13,7 @@ class MEX_TradeLog : public QDialog
     Q_OBJECT
 
 public:
-    explicit MEX_TradeLog(QList<MEX_Order*>&, QString&, QWidget *parent = 0);
+    explicit MEX_TradeLog(QList<MEX_Order>&, QString&, QWidget *parent = 0);
 
     ~MEX_TradeLog();
 

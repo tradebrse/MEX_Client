@@ -130,7 +130,7 @@
      <string>Execute</string>
     </property>
    </widget>
-   <widget class="QTableWidget" name="tableWidgetOrderbookBid">
+   <widget class="QTableWidget" name="tableWidgetOrderbookBuy">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -178,7 +178,7 @@
     </column>
     <column>
      <property name="text">
-      <string>Bid</string>
+      <string>Buy</string>
      </property>
     </column>
     <column>
@@ -244,7 +244,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QTableWidget" name="tableWidgetOrderbookAsk">
+   <widget class="QTableWidget" name="tableWidgetOrderbookSell">
     <property name="geometry">
      <rect>
       <x>720</x>
@@ -281,7 +281,7 @@
     </column>
     <column>
      <property name="text">
-      <string>Ask</string>
+      <string>Sell</string>
      </property>
     </column>
     <column>
@@ -320,30 +320,30 @@
     <property name="title">
      <string/>
     </property>
-    <widget class="QRadioButton" name="radioButtonBid">
+    <widget class="QRadioButton" name="radioButtonBuy">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>82</width>
+       <width>41</width>
        <height>17</height>
       </rect>
      </property>
      <property name="text">
-      <string>Bid</string>
+      <string>Buy</string>
      </property>
     </widget>
-    <widget class="QRadioButton" name="radioButtonAsk">
+    <widget class="QRadioButton" name="radioButtonSell">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>40</y>
-       <width>82</width>
+       <width>41</width>
        <height>17</height>
       </rect>
      </property>
      <property name="text">
-      <string>Ask</string>
+      <string>Sell</string>
      </property>
     </widget>
    </widget>
@@ -498,33 +498,6 @@
      <bool>false</bool>
     </property>
    </widget>
-   <zorder>cBoxProductExec</zorder>
-   <zorder>lblProductShow</zorder>
-   <zorder>checkBoxAllProducts</zorder>
-   <zorder>lblTradingGUI</zorder>
-   <zorder>btnShow</zorder>
-   <zorder>edtComment</zorder>
-   <zorder>edtQuantity</zorder>
-   <zorder>btnLogOut</zorder>
-   <zorder>btnExecute</zorder>
-   <zorder>tableWidgetOrderbookBid</zorder>
-   <zorder>lblProductExec</zorder>
-   <zorder>groupBoxShowAll</zorder>
-   <zorder>tableWidgetOrderbookAsk</zorder>
-   <zorder>lblQuantity</zorder>
-   <zorder>groupBoxExecuteBidAsk</zorder>
-   <zorder>edtValue</zorder>
-   <zorder>lblComment</zorder>
-   <zorder>cBoxProductShow</zorder>
-   <zorder>lblValue</zorder>
-   <zorder>lblConnectionStatus</zorder>
-   <zorder>btnConnect</zorder>
-   <zorder>btnDisconnect</zorder>
-   <zorder>cBoxIndexExec</zorder>
-   <zorder>lblIndexExec</zorder>
-   <zorder>lblIndexShow</zorder>
-   <zorder>cBoxIndexShow</zorder>
-   <zorder>radioButtonAll</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -568,10 +541,10 @@
   <tabstop>radioButtonAll</tabstop>
   <tabstop>radioButtonMine</tabstop>
   <tabstop>btnShow</tabstop>
-  <tabstop>tableWidgetOrderbookBid</tabstop>
-  <tabstop>tableWidgetOrderbookAsk</tabstop>
-  <tabstop>radioButtonBid</tabstop>
-  <tabstop>radioButtonAsk</tabstop>
+  <tabstop>tableWidgetOrderbookBuy</tabstop>
+  <tabstop>tableWidgetOrderbookSell</tabstop>
+  <tabstop>radioButtonBuy</tabstop>
+  <tabstop>radioButtonSell</tabstop>
   <tabstop>cBoxProductExec</tabstop>
   <tabstop>edtValue</tabstop>
   <tabstop>edtQuantity</tabstop>

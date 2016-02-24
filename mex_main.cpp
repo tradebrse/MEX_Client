@@ -13,7 +13,7 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
 
 
     //Set checked buttons for application start
-    ui->radioButtonBid->setChecked(true);
+    ui->radioButtonBuy->setChecked(true);
     ui->radioButtonAll->setChecked(true);
     ui->checkBoxAllProducts->setChecked(true);
 
@@ -22,11 +22,11 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
 
     //connect column clicks to sort functions
     //Order the tables by time
-    ui->tableWidgetOrderbookAsk->sortItems(6);
-    ui->tableWidgetOrderbookBid->sortItems(6);
+    ui->tableWidgetOrderbookSell->sortItems(6);
+    ui->tableWidgetOrderbookBuy->sortItems(6);
     //Connect column clicks to sort function
-    connect(ui->tableWidgetOrderbookAsk->horizontalHeader(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)), this, SLOT(sortAskTable(int,Qt::SortOrder)));
-    connect(ui->tableWidgetOrderbookBid->horizontalHeader(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)), this, SLOT(sortAskTable(int,Qt::SortOrder)));
+    connect(ui->tableWidgetOrderbookSell->horizontalHeader(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)), this, SLOT(sortSellTable(int,Qt::SortOrder)));
+    connect(ui->tableWidgetOrderbookBuy->horizontalHeader(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)), this, SLOT(sortBuyTable(int,Qt::SortOrder)));
 
     //Delete main window when closed on logout
     this->setAttribute(Qt::WA_DeleteOnClose);
@@ -202,7 +202,7 @@ void MEX_Main::on_actionTrade_Log_triggered()
 
 //Disable main application and open 'tradeLog' dialog
 void MEX_Main::openTradeLog(){
-    MEX_TradeLog *tradeLogDialog = new MEX_TradeLog(matchedOrders, this->userID);
+    MEX_TradeLog *tradeLogDialog = new MEX_TradeLog(myOrders, this->userID);
     tradeLogDialog->setAttribute(Qt::WA_DeleteOnClose);
     connect( tradeLogDialog, SIGNAL(destroyed()), this, SLOT(enableWindow()));
     //Funktioniert loadTrader??
@@ -263,7 +263,6 @@ void MEX_Main::readProductDB(QString index)
         //Error while executing SQL-Statement
         QMessageBox::critical(0,"Error","Could not execute query.");
     }
-    qDebug() << index;
     ui->cBoxProductExec->clear();
     ui->cBoxProductShow->clear();
     generateProducts(productSymbolList, productNameList,productIndexList);
@@ -337,13 +336,13 @@ void MEX_Main::on_btnExecute_clicked()
 void MEX_Main::executeOrder()
 {
     QString ordertype;
-    if(ui->radioButtonAsk->isChecked())
+    if(ui->radioButtonSell->isChecked())
     {
-        ordertype = "ASK";
+        ordertype = "SELL";
     }
-    else if(ui->radioButtonBid->isChecked())
+    else if(ui->radioButtonBuy->isChecked())
     {
-        ordertype = "BID";
+        ordertype = "BUY";
     }
 
     bool ok = false;
@@ -402,14 +401,14 @@ void MEX_Main::on_btnShow_clicked()
 void MEX_Main::refreshTable()
 {
     //Remove all current rows from tablewidget
-    while (ui->tableWidgetOrderbookAsk->rowCount() > 0)
+    while (ui->tableWidgetOrderbookSell->rowCount() > 0)
     {
-        ui->tableWidgetOrderbookAsk->removeRow(0);
+        ui->tableWidgetOrderbookSell->removeRow(0);
     }
     //Remove all current rows from tablewidget
-    while (ui->tableWidgetOrderbookBid->rowCount() > 0)
+    while (ui->tableWidgetOrderbookBuy->rowCount() > 0)
     {
-        ui->tableWidgetOrderbookBid->removeRow(0);
+        ui->tableWidgetOrderbookBuy->removeRow(0);
     }
     //Iterator that goes through all orders
     QList<MEX_Order>::iterator orderboookIterator;
@@ -425,57 +424,57 @@ void MEX_Main::refreshTable()
         }
     }
     //Order the tables by time
-    ui->tableWidgetOrderbookAsk->sortItems(6);
-    ui->tableWidgetOrderbookBid->sortItems(6);
+    ui->tableWidgetOrderbookSell->sortItems(6);
+    ui->tableWidgetOrderbookBuy->sortItems(6);
     //seperate the orders and add the information to the table widgets
     for(orderboookIterator = currentOrderbook.begin(); orderboookIterator != currentOrderbook.end(); orderboookIterator++)
     {
-        if((*orderboookIterator).getOrdertype() == "ASK")
+        if((*orderboookIterator).getOrdertype() == "SELL")
         {
             if((selectedProducts == "ALL" || selectedProducts == (*orderboookIterator).getProduct().getName()) && (selectedUsers == "ALL" || selectedUsers == (*orderboookIterator).getTraderID()) && (ui->cBoxIndexShow->currentText() == (*orderboookIterator).getProduct().getIndex()))
             {
                 //Count number of rows
-                newRow = ui->tableWidgetOrderbookAsk->rowCount();
+                newRow = ui->tableWidgetOrderbookSell->rowCount();
                 //insert new Row at end of widget
-                ui->tableWidgetOrderbookAsk->insertRow(newRow);
-                // ui->tableWidgetOrderbookAsk->setItem(
-                ui->tableWidgetOrderbookAsk->setItem(newRow, 0,new QTableWidgetItem((*orderboookIterator).getProduct().getSymbol()));
-                ui->tableWidgetOrderbookAsk->setItem(newRow, 1,new QTableWidgetItem((*orderboookIterator).getProduct().getIndex()));
-                ui->tableWidgetOrderbookAsk->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
-                ui->tableWidgetOrderbookAsk->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getQuantity())));
-                ui->tableWidgetOrderbookAsk->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getValue())));
-                ui->tableWidgetOrderbookAsk->setItem(newRow, 5,new QTableWidgetItem((*orderboookIterator).getComment()));
-                ui->tableWidgetOrderbookAsk->setItem(newRow, 6,new QTableWidgetItem((*orderboookIterator).getTime().toString("hh:mm:ss.zzz")));
+                ui->tableWidgetOrderbookSell->insertRow(newRow);
+                // ui->tableWidgetOrderbookSell->setItem(
+                ui->tableWidgetOrderbookSell->setItem(newRow, 0,new QTableWidgetItem((*orderboookIterator).getProduct().getSymbol()));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 1,new QTableWidgetItem((*orderboookIterator).getProduct().getIndex()));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getQuantity())));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getValue())));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 5,new QTableWidgetItem((*orderboookIterator).getComment()));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 6,new QTableWidgetItem((*orderboookIterator).getTime().toString("hh:mm:ss.zzz")));
             }
         }
-        else if((*orderboookIterator).getOrdertype() == "BID")
+        else if((*orderboookIterator).getOrdertype() == "BUY")
         {
             if((selectedProducts == "ALL" || selectedProducts == (*orderboookIterator).getProduct().getName()) && (selectedUsers == "ALL" || selectedUsers == (*orderboookIterator).getTraderID()) && (ui->cBoxIndexShow->currentText() == (*orderboookIterator).getProduct().getIndex()))
             {
-                newRow = ui->tableWidgetOrderbookBid->rowCount();
+                newRow = ui->tableWidgetOrderbookBuy->rowCount();
 
-                ui->tableWidgetOrderbookBid->insertRow(newRow);
-                ui->tableWidgetOrderbookBid->setItem(newRow, 0,new QTableWidgetItem((*orderboookIterator).getProduct().getSymbol()));
-                ui->tableWidgetOrderbookBid->setItem(newRow, 1,new QTableWidgetItem((*orderboookIterator).getProduct().getIndex()));
-                ui->tableWidgetOrderbookBid->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
-                ui->tableWidgetOrderbookBid->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getQuantity())));
-                ui->tableWidgetOrderbookBid->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getValue())));
-                ui->tableWidgetOrderbookBid->setItem(newRow, 5,new QTableWidgetItem((*orderboookIterator).getComment()));
-                ui->tableWidgetOrderbookBid->setItem(newRow, 6,new QTableWidgetItem((*orderboookIterator).getTime().toString("hh:mm:ss.zzz")));
+                ui->tableWidgetOrderbookBuy->insertRow(newRow);
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 0,new QTableWidgetItem((*orderboookIterator).getProduct().getSymbol()));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 1,new QTableWidgetItem((*orderboookIterator).getProduct().getIndex()));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getQuantity())));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getValue())));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 5,new QTableWidgetItem((*orderboookIterator).getComment()));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 6,new QTableWidgetItem((*orderboookIterator).getTime().toString("hh:mm:ss.zzz")));
             }
         }
     }
 }
 
 //Sort tables by given column
-void MEX_Main::sortAskTable(int column, Qt::SortOrder order)
+void MEX_Main::sortSellTable(int column, Qt::SortOrder order)
 {
-    ui->tableWidgetOrderbookAsk->sortItems(column,order);
+    ui->tableWidgetOrderbookSell->sortItems(column,order);
 }
 
-void MEX_Main::sortBidTable(int column, Qt::SortOrder order)
+void MEX_Main::sortBuyTable(int column, Qt::SortOrder order)
 {
-    ui->tableWidgetOrderbookBid->sortItems(column,order);
+    ui->tableWidgetOrderbookBuy->sortItems(column,order);
 }
 
 //SQL database query execution
@@ -483,9 +482,7 @@ QSqlQuery MEX_Main::executeQuery (QString sqlCommand, bool &ok)
 {
     if (!db.open())
     {
-        QMessageBox messageBox;
-        messageBox.critical(0,"Error","No database connection.");
-        messageBox.show();
+        QMessageBox::critical(0,"Error","No database connection.");
         QSqlQuery emptyQuery;
         return emptyQuery;
     } else
