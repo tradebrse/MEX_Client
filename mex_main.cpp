@@ -46,7 +46,7 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     readProductDB();
 
 
-    //Set indices in GUI
+    //Set indices in
     QStringList distinctProductIndexList;
     for(int i = 0; i < productIndexList.length(); i++)
     {
@@ -101,7 +101,7 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
 
     connect(tcpClientSocket,SIGNAL(clientConnected()),this,SLOT(changeToConnected()));
     connect(tcpClientSocket,SIGNAL(clientDisconnected()),this,SLOT(changeToDisconnected()));
-    connect(tcpClientSocket,SIGNAL(serverDataToGUI(QList<MEX_Order>)), this,SLOT(updateOrderbook(QList<MEX_Order>)));
+    connect(tcpClientSocket,SIGNAL(serverDataToGUI(QList<MEX_Order>, QList<MEX_Order>)), this,SLOT(updateOrderLists(QList<MEX_Order>, QList<MEX_Order>)));
     //Start connection
     tcpClientSocket->doConnect();
 }
@@ -140,10 +140,11 @@ void MEX_Main::changeToDisconnected()
     this->isConnected = false;
 }
 
-void MEX_Main::updateOrderbook(QList<MEX_Order> currentOrderbook)
+void MEX_Main::updateOrderLists(QList<MEX_Order> currentOrderbook, QList<MEX_Order> matchedOrders)
 {
     this->currentOrderbook = currentOrderbook;
     refreshTable();
+    this->myOrders = matchedOrders;
 }
 
 void MEX_Main::on_btnLogOut_clicked()
@@ -205,7 +206,7 @@ void MEX_Main::openTradeLog(){
     MEX_TradeLog *tradeLogDialog = new MEX_TradeLog(myOrders, this->userID);
     tradeLogDialog->setAttribute(Qt::WA_DeleteOnClose);
     connect( tradeLogDialog, SIGNAL(destroyed()), this, SLOT(enableWindow()));
-    //Funktioniert loadTrader??
+    ///Funktioniert loadTrader??
     connect( tradeLogDialog, SIGNAL(destroyed()), this, SLOT(loadTrader()));
     connect( this, SIGNAL(destroyed()), tradeLogDialog, SLOT(close()));
     tradeLogDialog->show();

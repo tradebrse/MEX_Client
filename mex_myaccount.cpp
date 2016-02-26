@@ -86,9 +86,7 @@ void MEX_MyAccount::changePassword(){
                         query = executeQuery(sqlCommand, ok);
                         if (ok)
                         {
-                            QMessageBox messageBox;
-                            messageBox.information(0,"Success","Password has been changed.");
-                            messageBox.show();
+                            QMessageBox::information(0,"Success","Password has been changed.");
                             ui->edtCurrentPassword->clear();
                             ui->edtNewPassword->clear();
                             ui->edtNewPassword_2->clear();

@@ -531,7 +531,7 @@
   </action>
   <action name="actionTrade_Log">
    <property name="text">
-    <string>Trade Log</string>
+    <string>My Trades</string>
    </property>
   </action>
  </widget>

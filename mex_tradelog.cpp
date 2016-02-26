@@ -16,7 +16,6 @@ MEX_TradeLog::MEX_TradeLog(QList<MEX_Order>& myOrders, QString& userID, QWidget 
         ui->tableWidgetMatchedOrders->removeRow(0); //Remove all current rows from tablewidget
     }
     QList<MEX_Order>::iterator j;
-
     for(j = myOrders.begin(); j != myOrders.end(); j++)
     {
         if((*j).getTraderID() == userID){

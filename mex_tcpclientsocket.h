@@ -28,7 +28,7 @@ public:
 signals:
     void clientConnected();
     void clientDisconnected();
-    void serverDataToGUI(QList<MEX_Order> currentOrderbook);
+    void serverDataToGUI(QList<MEX_Order> currentOrderbook, QList<MEX_Order> matchedOrders);
 public slots:
     void readServerData();
 private slots:

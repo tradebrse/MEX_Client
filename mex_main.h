@@ -76,7 +76,7 @@ private slots:
 
     void changeToDisconnected();
 
-    void updateOrderbook(QList<MEX_Order> currentOrderbook);
+    void updateOrderLists(QList<MEX_Order> currentOrderbook, QList<MEX_Order> matchedOrders);
 
     void sortSellTable(int column, Qt::SortOrder order);
 

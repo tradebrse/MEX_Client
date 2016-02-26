@@ -93,7 +93,9 @@ void MEX_TCPClientSocket::readServerData()
 {
     //Get the data
     QByteArray data = socket->readAll();
-    //Declare and initialize orderbook
+    //Declare and initialize matched orders list
+    QList<MEX_Order>  matchedOrders;
+    //Declare and initialize order book
     QList<MEX_Order>  currentOrderbook;
     //Convert orderbook data to list of orders
     xmlReader = new QXmlStreamReader(data);
@@ -103,85 +105,97 @@ void MEX_TCPClientSocket::readServerData()
         xmlReader->readNext();
         if(xmlReader->isStartElement())
         {
-            if(xmlReader->name() == "Orderbook")
+            if(xmlReader->name() == "Orderlists")
             {
-                readOrders(currentOrderbook);
+                while(!xmlReader->atEnd())
+                {
+                    xmlReader->readNext();
+                    if(xmlReader->isStartElement())
+                    {
+                        if(xmlReader->name() == "Orderbook")
+                        {
+                            readOrders(currentOrderbook);
+                        }
+                        else if(xmlReader->name() == "MatchedOrders")
+                        {
+                            readOrders(matchedOrders);
+                        }
+                    }
+                }
             }
             else
             {
-                ///No relevant data found
-                qDebug() << "No Orderbook XML...";
+                //No relevant data found
+                QMessageBox::warning(0,"Unvalid data","Could not receive valid data from the server.");
             }
         }
     }
     //Send new orderbook from server to GUI application
-    emit serverDataToGUI(currentOrderbook);
+    emit serverDataToGUI(currentOrderbook, matchedOrders);
 }
 
 void MEX_TCPClientSocket::readOrders(QList<MEX_Order>  &orderbook)
 {
-    //Get first line after orderbook
+    //Get first line after order list description - e.g. Orderbook / MatchedOrders
     xmlReader->readNext();
-    //Initialise order variables
-    while(!xmlReader->atEnd())
+    //Initialize order variables
+    while(!xmlReader->atEnd() && xmlReader->name() != "Separator")
     {
-        if(xmlReader->isStartElement())
+        //Look for 'Order' entries
+        if(xmlReader->isStartElement() && xmlReader->name() == "Order")
         {
-            //Look for 'Order' entries
-            if(xmlReader->name() == "Order")
+            //Create order object
+            MEX_Order order;
+            xmlReader->readNext();
+            while(xmlReader->name() != "Order")
             {
-                //Create order object
-                MEX_Order order;
-                xmlReader->readNext();
-                while(xmlReader->name() != "Order")
+                if (xmlReader->isStartElement())
                 {
-                    if (xmlReader->isStartElement())
+                    //Set attributes for order
+                    if (xmlReader->name() == "Trader_ID")
                     {
-                        //Set attributes for order
-                        if (xmlReader->name() == "Trader_ID")
-                        {
-                            order.setTraderID(xmlReader->readElementText());
-                        }
-                        else if (xmlReader->name() == "Order_ID")
-                        {
-                            order.setOrderID(xmlReader->readElementText().toInt());
-                        }
-                        else if (xmlReader->name() == "Value")
-                        {
-                            order.setValue(xmlReader->readElementText().toInt());
-                        }
-                        else if (xmlReader->name() == "Quantity")
-                        {
-                            order.setQuantity(xmlReader->readElementText().toInt());
-                        }
-                        else if (xmlReader->name() == "Comment")
-                        {
-                            order.setComment(xmlReader->readElementText());
-                        }
-                        else if (xmlReader->name() == "Product")
-                        {
-                            MEX_Product product;
-                            product.setSymbol(xmlReader->readElementText());
-                            product.setIndex("");
-                            product.setName("");
-                            order.setProduct(product);
-                        }
-                        else if (xmlReader->name() == "Order_Type")
-                        {
-                            order.setOrdertype(xmlReader->readElementText());
-                        }
-                        else if (xmlReader->name() == "Time")
-                        {
-                            QDateTime time = QDateTime::fromString(xmlReader->readElementText(),"hh:mm:ss.zzz");
-                            order.setTime(time);
-                        }
+                        order.setTraderID(xmlReader->readElementText());
                     }
-                    //Read next line
-                    xmlReader->readNext();
+                    else if (xmlReader->name() == "Order_ID")
+                    {
+                        order.setOrderID(xmlReader->readElementText().toInt());
+                    }
+                    else if (xmlReader->name() == "Value")
+                    {
+                        order.setValue(xmlReader->readElementText().toInt());
+                    }
+                    else if (xmlReader->name() == "Quantity")
+                    {
+                        order.setQuantity(xmlReader->readElementText().toInt());
+                    }
+                    else if (xmlReader->name() == "Comment")
+                    {
+                        order.setComment(xmlReader->readElementText());
+                    }
+                    else if (xmlReader->name() == "Product")
+                    {
+                        MEX_Product product;
+                        product.setSymbol(xmlReader->readElementText());
+                        product.setIndex("");
+                        product.setName("");
+                        order.setProduct(product);
+                    }
+                    else if (xmlReader->name() == "Order_Type")
+                    {
+                        order.setOrdertype(xmlReader->readElementText());
+                    }
+                    else if (xmlReader->name() == "Time")
+                    {
+                        QDateTime time = QDateTime::fromString(xmlReader->readElementText(),"hh:mm:ss.zzz");
+                        order.setTime(time);
+                    }
                 }
-                //Add the new order to the orderbook
-                orderbook.append(order);
+                //Read next line
+                xmlReader->readNext();
             }
+            //Add the new order to the orderbook
+            orderbook.append(order);
+
         }
         else
         {
