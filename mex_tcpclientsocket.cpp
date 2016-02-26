@@ -1,8 +1,9 @@
 #include "mex_tcpclientsocket.h"
 
-MEX_TCPClientSocket::MEX_TCPClientSocket(QObject *parent) :
+MEX_TCPClientSocket::MEX_TCPClientSocket(QString traderID, QObject *parent) :
     QObject(parent)
 {
+    this->traderID = traderID;
 }
 
 void MEX_TCPClientSocket::doConnect()
@@ -15,16 +16,17 @@ void MEX_TCPClientSocket::doConnect()
 
     socket->connectToHost("127.0.0.1", 1234);
     xmlWriter.setAutoFormatting(true);
-    if(socket->waitForConnected(30000)){
+    if(socket->waitForConnected(10000)){
         emit clientConnected();
     }
     else
     {
-        QMessageBox messageBox;
-        messageBox.warning(0,"Connection Error",socket->errorString());
-        messageBox.show();
+        QMessageBox::warning(0,"Connection Error",socket->errorString());
         emit clientDisconnected();
     }
+
+    //Send empty order to give traderID information to server
+    sendOrder(this->traderID,0,0,"","","");
 }
 
 void MEX_TCPClientSocket::sendOrder(QString traderID, int value, int quantity, QString comment, QString productsymbol, QString ordertype)
@@ -34,7 +36,6 @@ void MEX_TCPClientSocket::sendOrder(QString traderID, int value, int quantity, Q
     //Write start of document and set Order tag
     xmlWriter.writeStartDocument();
     xmlWriter.writeStartElement("Order");
-    /// AUF SERVER: ZEIT UND ORDER ID NICHT VERGESSEN
     //Write trader ID
     xmlWriter.writeStartElement("Trader_ID");
     xmlWriter.writeCharacters(traderID);

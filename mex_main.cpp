@@ -97,13 +97,14 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     }
 
 
-    tcpClientSocket = new MEX_TCPClientSocket();
+    tcpClientSocket = new MEX_TCPClientSocket(traderID);
 
     connect(tcpClientSocket,SIGNAL(clientConnected()),this,SLOT(changeToConnected()));
     connect(tcpClientSocket,SIGNAL(clientDisconnected()),this,SLOT(changeToDisconnected()));
     connect(tcpClientSocket,SIGNAL(serverDataToGUI(QList<MEX_Order>, QList<MEX_Order>)), this,SLOT(updateOrderLists(QList<MEX_Order>, QList<MEX_Order>)));
     //Start connection
     tcpClientSocket->doConnect();
+    tcpClientSocket->requestOrderbook();
 }
 
 MEX_Main::~MEX_Main()
@@ -203,6 +204,21 @@ void MEX_Main::on_actionTrade_Log_triggered()
 
 //Disable main application and open 'tradeLog' dialog
 void MEX_Main::openTradeLog(){
+
+    //Iterator that goes through all matched orders
+    QList<MEX_Order>::iterator matchedOrdersIterator;
+    //Set products for all orders by looking up porduct symbol
+    for(matchedOrdersIterator = myOrders.begin(); matchedOrdersIterator != myOrders.end(); matchedOrdersIterator++)
+    {
+        for(int i = 0; i < productList.length(); i++)
+        {
+            if((*matchedOrdersIterator).getProduct().getSymbol() == productList.value(i).getSymbol())
+            {
+                (*matchedOrdersIterator).setProduct(productList.value(i));
+            }
+        }
+    }
+
     MEX_TradeLog *tradeLogDialog = new MEX_TradeLog(myOrders, this->userID);
     tradeLogDialog->setAttribute(Qt::WA_DeleteOnClose);
     connect( tradeLogDialog, SIGNAL(destroyed()), this, SLOT(enableWindow()));
@@ -412,15 +428,15 @@ void MEX_Main::refreshTable()
         ui->tableWidgetOrderbookBuy->removeRow(0);
     }
     //Iterator that goes through all orders
-    QList<MEX_Order>::iterator orderboookIterator;
+    QList<MEX_Order>::iterator orderbookIterator;
     //Set products for all orders by looking up porduct symbol
-    for(orderboookIterator = currentOrderbook.begin(); orderboookIterator != currentOrderbook.end(); orderboookIterator++)
+    for(orderbookIterator = currentOrderbook.begin(); orderbookIterator != currentOrderbook.end(); orderbookIterator++)
     {
         for(int i = 0; i < productList.length(); i++)
         {
-            if((*orderboookIterator).getProduct().getSymbol() == productList.value(i).getSymbol())
+            if((*orderbookIterator).getProduct().getSymbol() == productList.value(i).getSymbol())
             {
-                (*orderboookIterator).setProduct(productList.value(i));
+                (*orderbookIterator).setProduct(productList.value(i));
             }
         }
     }
@@ -428,40 +444,40 @@ void MEX_Main::refreshTable()
     ui->tableWidgetOrderbookSell->sortItems(6);
     ui->tableWidgetOrderbookBuy->sortItems(6);
     //seperate the orders and add the information to the table widgets
-    for(orderboookIterator = currentOrderbook.begin(); orderboookIterator != currentOrderbook.end(); orderboookIterator++)
+    for(orderbookIterator = currentOrderbook.begin(); orderbookIterator != currentOrderbook.end(); orderbookIterator++)
     {
-        if((*orderboookIterator).getOrdertype() == "SELL")
+        if((*orderbookIterator).getOrdertype() == "SELL")
         {
-            if((selectedProducts == "ALL" || selectedProducts == (*orderboookIterator).getProduct().getName()) && (selectedUsers == "ALL" || selectedUsers == (*orderboookIterator).getTraderID()) && (ui->cBoxIndexShow->currentText() == (*orderboookIterator).getProduct().getIndex()))
+            if((selectedProducts == "ALL" || selectedProducts == (*orderbookIterator).getProduct().getName()) && (selectedUsers == "ALL" || selectedUsers == (*orderbookIterator).getTraderID()) && (ui->cBoxIndexShow->currentText() == (*orderbookIterator).getProduct().getIndex()))
             {
                 //Count number of rows
                 newRow = ui->tableWidgetOrderbookSell->rowCount();
                 //insert new Row at end of widget
                 ui->tableWidgetOrderbookSell->insertRow(newRow);
                 // ui->tableWidgetOrderbookSell->setItem(
-                ui->tableWidgetOrderbookSell->setItem(newRow, 0,new QTableWidgetItem((*orderboookIterator).getProduct().getSymbol()));
-                ui->tableWidgetOrderbookSell->setItem(newRow, 1,new QTableWidgetItem((*orderboookIterator).getProduct().getIndex()));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 0,new QTableWidgetItem((*orderbookIterator).getProduct().getSymbol()));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 1,new QTableWidgetItem((*orderbookIterator).getProduct().getIndex()));
                 ui->tableWidgetOrderbookSell->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
-                ui->tableWidgetOrderbookSell->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getQuantity())));
-                ui->tableWidgetOrderbookSell->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getValue())));
-                ui->tableWidgetOrderbookSell->setItem(newRow, 5,new QTableWidgetItem((*orderboookIterator).getComment()));
-                ui->tableWidgetOrderbookSell->setItem(newRow, 6,new QTableWidgetItem((*orderboookIterator).getTime().toString("hh:mm:ss.zzz")));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getQuantity())));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getValue())));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 5,new QTableWidgetItem((*orderbookIterator).getComment()));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 6,new QTableWidgetItem((*orderbookIterator).getTime().toString("hh:mm:ss.zzz")));
             }
         }
-        else if((*orderboookIterator).getOrdertype() == "BUY")
+        else if((*orderbookIterator).getOrdertype() == "BUY")
         {
-            if((selectedProducts == "ALL" || selectedProducts == (*orderboookIterator).getProduct().getName()) && (selectedUsers == "ALL" || selectedUsers == (*orderboookIterator).getTraderID()) && (ui->cBoxIndexShow->currentText() == (*orderboookIterator).getProduct().getIndex()))
+            if((selectedProducts == "ALL" || selectedProducts == (*orderbookIterator).getProduct().getName()) && (selectedUsers == "ALL" || selectedUsers == (*orderbookIterator).getTraderID()) && (ui->cBoxIndexShow->currentText() == (*orderbookIterator).getProduct().getIndex()))
             {
                 newRow = ui->tableWidgetOrderbookBuy->rowCount();
 
                 ui->tableWidgetOrderbookBuy->insertRow(newRow);
-                ui->tableWidgetOrderbookBuy->setItem(newRow, 0,new QTableWidgetItem((*orderboookIterator).getProduct().getSymbol()));
-                ui->tableWidgetOrderbookBuy->setItem(newRow, 1,new QTableWidgetItem((*orderboookIterator).getProduct().getIndex()));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 0,new QTableWidgetItem((*orderbookIterator).getProduct().getSymbol()));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 1,new QTableWidgetItem((*orderbookIterator).getProduct().getIndex()));
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
-                ui->tableWidgetOrderbookBuy->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getQuantity())));
-                ui->tableWidgetOrderbookBuy->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderboookIterator).getValue())));
-                ui->tableWidgetOrderbookBuy->setItem(newRow, 5,new QTableWidgetItem((*orderboookIterator).getComment()));
-                ui->tableWidgetOrderbookBuy->setItem(newRow, 6,new QTableWidgetItem((*orderboookIterator).getTime().toString("hh:mm:ss.zzz")));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getQuantity())));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getValue())));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 5,new QTableWidgetItem((*orderbookIterator).getComment()));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 6,new QTableWidgetItem((*orderbookIterator).getTime().toString("hh:mm:ss.zzz")));
             }
         }
     }

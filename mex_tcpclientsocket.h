@@ -14,7 +14,7 @@ class MEX_TCPClientSocket : public QObject
 {
     Q_OBJECT
 public:
-    explicit MEX_TCPClientSocket(QObject *parent = 0);
+    explicit MEX_TCPClientSocket(QString traderID, QObject *parent = 0);
 
     void doConnect();
 
@@ -38,6 +38,7 @@ private:
     QXmlStreamWriter xmlWriter;
     QXmlStreamReader* xmlReader;
     MEX_Order order;
+    QString traderID;
 };
 
 

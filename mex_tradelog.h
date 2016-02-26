@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <mex_order.h>
+#include <mex_tablewidgetitem.h>
 
 namespace Ui {
 class MEX_TradeLog;
@@ -19,6 +20,7 @@ public:
 
 private slots:
     void on_bntClear_clicked();
+    void sortMatchedOrdersTable(int,Qt::SortOrder);
 
 private:
     Ui::MEX_TradeLog *ui;
