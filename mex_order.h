@@ -9,7 +9,7 @@ class MEX_Order
 {
 public:
     MEX_Order();
-    MEX_Order(QString traderID, int orderID, int value, int quantity, QString comment, MEX_Product product, QString ordertype, QDateTime time);
+    MEX_Order(QString traderID, int orderID, double value, int quantity, QString comment, MEX_Product product, QString ordertype, QDateTime time);
     MEX_Order(const MEX_Order &other);
     ~MEX_Order();
 
@@ -17,7 +17,7 @@ public:
     QString getTraderID();
     QString getOrdertype();
     int getOrderID();
-    int getValue();
+    double getValue();
     int getQuantity();
     QDateTime getTime();
     QString getComment();
@@ -25,7 +25,7 @@ public:
     //Setter methods
     void setTraderID(QString);
     void setOrderID(int);
-    void setValue(int);
+    void setValue(double);
     void setQuantity(int);
     void setComment(QString);
     void setProduct(MEX_Product);
@@ -35,7 +35,7 @@ public:
 private:
     QString traderID;
     int orderID;
-    int value;
+    double value;
     int quantity;
     QString comment;
     QDateTime time;

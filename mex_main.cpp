@@ -377,12 +377,28 @@ void MEX_Main::executeOrder()
         //Error while executing SQL-Statement
         QMessageBox::critical(0,"Error","Could not execute query.");
     }
-    int value = ui->edtValue->text().toInt();
-    int quantity = ui->edtQuantity->text().toInt();
-    QString comment = ui->edtComment->text();
 
-    //Send order information from GUI to TCP socket
-    tcpClientSocket->sendOrder(traderID, value, quantity, comment, productSymbol, ordertype);
+    //Set regular expressions for value and quantity
+    QRegExp quatntityRegEx("[1-9]{1}[0-9]{0,3}");
+    QRegExp valueRegEx("([0-9]{1,5}[\\.][0-9]{1,3})|([1-9]{1}[0-9]{0,3})");
+
+    if(valueRegEx.exactMatch(ui->edtValue->text().replace(",",".")) && quatntityRegEx.exactMatch(ui->edtQuantity->text()))
+    {
+        double value = ui->edtValue->text().replace(",",".").toDouble();
+        int quantity = ui->edtQuantity->text().toInt();
+        QString comment = ui->edtComment->text();
+
+        tcpClientSocket->sendOrder(traderID, value, quantity, comment, productSymbol, ordertype);
+    }
+
+    else if(!valueRegEx.exactMatch(ui->edtValue->text()))
+    {
+        QMessageBox::information(0,"Invalid input","Inavlid value.");
+    }
+    else if(!quatntityRegEx.exactMatch(ui->edtQuantity->text()))
+    {
+        QMessageBox::information(0,"Invalid input","Invalid quantity.");
+    }
 }
 
 //Get current filter settings and refresh the tables
@@ -452,11 +468,11 @@ void MEX_Main::refreshTable()
             {
                 //Count number of rows
                 newRow = ui->tableWidgetOrderbookSell->rowCount();
-                //insert new Row at end of widget
+                //Insert new Row at end of widget
+
                 ui->tableWidgetOrderbookSell->insertRow(newRow);
-                // ui->tableWidgetOrderbookSell->setItem(
-                ui->tableWidgetOrderbookSell->setItem(newRow, 0,new QTableWidgetItem((*orderbookIterator).getProduct().getSymbol()));
-                ui->tableWidgetOrderbookSell->setItem(newRow, 1,new QTableWidgetItem((*orderbookIterator).getProduct().getIndex()));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 0,new QTableWidgetItem((*orderbookIterator).getProduct().getIndex()));
+                ui->tableWidgetOrderbookSell->setItem(newRow, 1,new QTableWidgetItem((*orderbookIterator).getProduct().getSymbol()));
                 ui->tableWidgetOrderbookSell->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
                 ui->tableWidgetOrderbookSell->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getQuantity())));
                 ui->tableWidgetOrderbookSell->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getValue())));
@@ -471,8 +487,8 @@ void MEX_Main::refreshTable()
                 newRow = ui->tableWidgetOrderbookBuy->rowCount();
 
                 ui->tableWidgetOrderbookBuy->insertRow(newRow);
-                ui->tableWidgetOrderbookBuy->setItem(newRow, 0,new QTableWidgetItem((*orderbookIterator).getProduct().getSymbol()));
-                ui->tableWidgetOrderbookBuy->setItem(newRow, 1,new QTableWidgetItem((*orderbookIterator).getProduct().getIndex()));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 0,new QTableWidgetItem((*orderbookIterator).getProduct().getIndex()));
+                ui->tableWidgetOrderbookBuy->setItem(newRow, 1,new QTableWidgetItem((*orderbookIterator).getProduct().getSymbol()));
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getQuantity())));
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getValue())));

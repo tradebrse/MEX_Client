@@ -23,8 +23,8 @@ MEX_TradeLog::MEX_TradeLog(QList<MEX_Order>& myOrders, QString& userID, QWidget 
         newRow = ui->tableWidgetMatchedOrders->rowCount();
 
         ui->tableWidgetMatchedOrders->insertRow(newRow);
-        ui->tableWidgetMatchedOrders->setItem(newRow, 0,new QTableWidgetItem((*j).getProduct().getSymbol()));
-        ui->tableWidgetMatchedOrders->setItem(newRow, 1,new QTableWidgetItem((*j).getProduct().getIndex()));
+        ui->tableWidgetMatchedOrders->setItem(newRow, 0,new QTableWidgetItem((*j).getProduct().getIndex()));
+        ui->tableWidgetMatchedOrders->setItem(newRow, 1,new QTableWidgetItem((*j).getProduct().getSymbol()));
         ui->tableWidgetMatchedOrders->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
         ui->tableWidgetMatchedOrders->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*j).getQuantity())));
         ui->tableWidgetMatchedOrders->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*j).getValue())));

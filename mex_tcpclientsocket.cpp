@@ -29,7 +29,7 @@ void MEX_TCPClientSocket::doConnect()
     sendOrder(this->traderID,0,0,"","","");
 }
 
-void MEX_TCPClientSocket::sendOrder(QString traderID, int value, int quantity, QString comment, QString productsymbol, QString ordertype)
+void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype)
 {
     //Write the XML to this socket
     xmlWriter.setDevice(socket);
@@ -163,7 +163,7 @@ void MEX_TCPClientSocket::readOrders(QList<MEX_Order>  &orderbook)
                     }
                     else if (xmlReader->name() == "Value")
                     {
-                        order.setValue(xmlReader->readElementText().toInt());
+                        order.setValue(xmlReader->readElementText().toDouble());
                     }
                     else if (xmlReader->name() == "Quantity")
                     {

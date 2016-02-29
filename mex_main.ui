@@ -153,7 +153,7 @@
     </property>
     <column>
      <property name="text">
-      <string>Symbol</string>
+      <string>Index</string>
      </property>
      <property name="font">
       <font>
@@ -163,7 +163,7 @@
     </column>
     <column>
      <property name="text">
-      <string>Index</string>
+      <string>Symbol</string>
      </property>
     </column>
     <column>
@@ -261,12 +261,12 @@
     </property>
     <column>
      <property name="text">
-      <string>Symbol</string>
+      <string>Index</string>
      </property>
     </column>
     <column>
      <property name="text">
-      <string>Index</string>
+      <string>Symbol</string>
      </property>
     </column>
     <column>

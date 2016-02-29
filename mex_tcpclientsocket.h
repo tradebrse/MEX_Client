@@ -18,7 +18,7 @@ public:
 
     void doConnect();
 
-    void sendOrder(QString traderID, int value, int quantity, QString comment, QString productsymbol, QString ordertype);
+    void sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype);
 
     void requestOrderbook();
 

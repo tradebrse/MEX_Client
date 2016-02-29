@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QVarLengthArray>
 #include <QtSql>
+#include <QRegExp>
 
 namespace Ui {
 class MEX_Main;
