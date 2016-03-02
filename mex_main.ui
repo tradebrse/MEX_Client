@@ -97,7 +97,7 @@
    <widget class="QLineEdit" name="edtQuantity">
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>430</x>
       <y>670</y>
       <width>113</width>
       <height>20</height>
@@ -147,6 +147,9 @@
     </property>
     <property name="editTriggers">
      <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <property name="alternatingRowColors">
+     <bool>true</bool>
     </property>
     <property name="sortingEnabled">
      <bool>true</bool>
@@ -256,6 +259,9 @@
     <property name="editTriggers">
      <set>QAbstractItemView::NoEditTriggers</set>
     </property>
+    <property name="alternatingRowColors">
+     <bool>true</bool>
+    </property>
     <property name="sortingEnabled">
      <bool>true</bool>
     </property>
@@ -298,7 +304,7 @@
    <widget class="QLabel" name="lblQuantity">
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>430</x>
       <y>650</y>
       <width>71</width>
       <height>16</height>
@@ -350,7 +356,7 @@
    <widget class="QLineEdit" name="edtValue">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>580</x>
       <y>670</y>
       <width>113</width>
       <height>20</height>
@@ -389,7 +395,7 @@
    <widget class="QLabel" name="lblValue">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>580</x>
       <y>650</y>
       <width>71</width>
       <height>16</height>
@@ -536,23 +542,25 @@
   </action>
  </widget>
  <tabstops>
+  <tabstop>cBoxIndexShow</tabstop>
   <tabstop>cBoxProductShow</tabstop>
   <tabstop>checkBoxAllProducts</tabstop>
   <tabstop>radioButtonAll</tabstop>
   <tabstop>radioButtonMine</tabstop>
   <tabstop>btnShow</tabstop>
+  <tabstop>btnConnect</tabstop>
+  <tabstop>btnDisconnect</tabstop>
+  <tabstop>btnLogOut</tabstop>
   <tabstop>tableWidgetOrderbookBuy</tabstop>
   <tabstop>tableWidgetOrderbookSell</tabstop>
   <tabstop>radioButtonBuy</tabstop>
   <tabstop>radioButtonSell</tabstop>
+  <tabstop>cBoxIndexExec</tabstop>
   <tabstop>cBoxProductExec</tabstop>
-  <tabstop>edtValue</tabstop>
   <tabstop>edtQuantity</tabstop>
+  <tabstop>edtValue</tabstop>
   <tabstop>edtComment</tabstop>
   <tabstop>btnExecute</tabstop>
-  <tabstop>btnConnect</tabstop>
-  <tabstop>btnDisconnect</tabstop>
-  <tabstop>btnLogOut</tabstop>
  </tabstops>
  <resources/>
  <connections/>

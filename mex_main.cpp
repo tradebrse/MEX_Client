@@ -70,32 +70,15 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     selectedUsers = "ALL";
 
     //Check usertype to activate admin mode
-    bool ok = false;
-    QString sqlCommand = "SELECT usertype FROM userList WHERE id = '" + userID + "' ";
-    QSqlQuery query(db);
-    query  = executeQuery(sqlCommand, ok);
+    if (permission == "admin")
+    {
 
-    if (ok)
-    {
-        query.first();
-        if (query.record().value(0).toString() == "client")
-        {
-            ui->actionAdmin_Panel->setVisible(false);
-        }
-        else if(query.record().value(0).toString() == "admin")
-        {
-            ui->actionAdmin_Panel->setVisible(true);
-        }
-    } else
-    {
-        //Error while executing SQL-Statement
-        QMessageBox messageBox;
-        messageBox.critical(0,"Error","Could not execute query.");
-        //deactivate admin user panel
-        ui->actionAdmin_Panel->setVisible(false);
-        messageBox.show();
+        ui->actionAdmin_Panel->setVisible(true);
     }
-
+    else
+    {
+        ui->actionAdmin_Panel->setVisible(false);
+    }
 
     tcpClientSocket = new MEX_TCPClientSocket(traderID);
 
@@ -222,7 +205,6 @@ void MEX_Main::openTradeLog(){
     MEX_TradeLog *tradeLogDialog = new MEX_TradeLog(myOrders, this->userID);
     tradeLogDialog->setAttribute(Qt::WA_DeleteOnClose);
     connect( tradeLogDialog, SIGNAL(destroyed()), this, SLOT(enableWindow()));
-    ///Funktioniert loadTrader??
     connect( tradeLogDialog, SIGNAL(destroyed()), this, SLOT(loadTrader()));
     connect( this, SIGNAL(destroyed()), tradeLogDialog, SLOT(close()));
     tradeLogDialog->show();
@@ -363,14 +345,16 @@ void MEX_Main::executeOrder()
     }
 
     bool ok = false;
-    QString   sqlCommand = "SELECT symbol FROM productList WHERE name = '" + ui->cBoxProductExec->currentText() + "' ";
+    QString   sqlCommand = "SELECT symbol, indexName FROM productList WHERE name = '" + ui->cBoxProductExec->currentText() + "' ";
     QSqlQuery query(db);
     query  = executeQuery(sqlCommand, ok);
     QString productSymbol;
+    QString productIndex;
     if (ok)
     {
         query.first();
         productSymbol = query.record().value(0).toString();
+        productIndex = query.record().value(1).toString();
     }
     else
     {
@@ -388,6 +372,8 @@ void MEX_Main::executeOrder()
         int quantity = ui->edtQuantity->text().toInt();
         QString comment = ui->edtComment->text();
 
+        logOrder(ordertype, productIndex, productSymbol, quantity, value, comment);
+
         tcpClientSocket->sendOrder(traderID, value, quantity, comment, productSymbol, ordertype);
     }
 
@@ -399,6 +385,18 @@ void MEX_Main::executeOrder()
     {
         QMessageBox::information(0,"Invalid input","Invalid quantity.");
     }
+}
+
+void MEX_Main::logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment)
+{
+    QDateTime date;
+    QString output = date.currentDateTime().toString()+" - "+ordertype+" | "+productIndex+" | "+productsymbol+" | "+QString::number(quantity)+"@"+QString::number(value)+" | Comment: "+comment+"\n";
+    QString filename = username+"_"+date.currentDateTime().toString("dd.MM.yyyy");
+    QFile outFile(filename+".log");
+
+    outFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+    QTextStream textStream(&outFile);
+    textStream<<output<<flush;
 }
 
 //Get current filter settings and refresh the tables

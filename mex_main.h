@@ -83,6 +83,8 @@ private slots:
 
     void sortBuyTable(int column, Qt::SortOrder order);
 
+    void logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment);
+
 private:
     Ui::MEX_Main *ui;
 
