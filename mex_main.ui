@@ -136,7 +136,7 @@
       <x>10</x>
       <y>130</y>
       <width>711</width>
-      <height>351</height>
+      <height>491</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -253,7 +253,7 @@
       <x>720</x>
       <y>130</y>
       <width>711</width>
-      <height>351</height>
+      <height>491</height>
      </rect>
     </property>
     <property name="editTriggers">

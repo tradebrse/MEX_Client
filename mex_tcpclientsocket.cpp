@@ -18,15 +18,14 @@ void MEX_TCPClientSocket::doConnect()
     xmlWriter.setAutoFormatting(true);
     if(socket->waitForConnected(10000)){
         emit clientConnected();
+        //Send empty order to give traderID information to server
+        sendOrder(this->traderID,0,0,"","","");
     }
     else
     {
         QMessageBox::warning(0,"Connection Error",socket->errorString());
         emit clientDisconnected();
     }
-
-    //Send empty order to give traderID information to server
-    sendOrder(this->traderID,0,0,"","","");
 }
 
 void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype)
@@ -92,8 +91,17 @@ void MEX_TCPClientSocket::doDisconnect()
 
 void MEX_TCPClientSocket::readServerData()
 {
-    //Get the data
-    QByteArray data = socket->readAll();
+    //Get the data and make sure all bytes are read
+    QByteArray data;
+    data = socket->readAll();
+    while(socket->waitForReadyRead(50))
+    {
+        while(socket->bytesAvailable() > 0)
+        {
+            data.append(socket->readAll());
+            socket->flush();
+        }
+    }
     //Declare and initialize matched orders list
     QList<MEX_Order>  matchedOrders;
     //Declare and initialize order book
@@ -190,13 +198,16 @@ void MEX_TCPClientSocket::readOrders(QList<MEX_Order>  &orderbook)
                         QDateTime time = QDateTime::fromString(xmlReader->readElementText(),"hh:mm:ss.zzz");
                         order.setTime(time);
                     }
+                    else if (xmlReader->name() == "Update")
+                    {
+                        order.setUpdated(xmlReader->readElementText().toInt());
+                    }
                 }
                 //Read next line
                 xmlReader->readNext();
             }
             //Add the new order to the orderbook
             orderbook.append(order);
-
         }
         else
         {

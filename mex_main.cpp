@@ -41,7 +41,6 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
 
     //Load Trader data from DB
     loadTrader();
-
     //Generate Products
     readProductDB();
 
@@ -80,14 +79,22 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
         ui->actionAdmin_Panel->setVisible(false);
     }
 
+    //Inititialize log file and clear old content
+    intitializeLogFile();
+    logFile.resize(0);
+
     tcpClientSocket = new MEX_TCPClientSocket(traderID);
 
     connect(tcpClientSocket,SIGNAL(clientConnected()),this,SLOT(changeToConnected()));
     connect(tcpClientSocket,SIGNAL(clientDisconnected()),this,SLOT(changeToDisconnected()));
     connect(tcpClientSocket,SIGNAL(serverDataToGUI(QList<MEX_Order>, QList<MEX_Order>)), this,SLOT(updateOrderLists(QList<MEX_Order>, QList<MEX_Order>)));
+
     //Start connection
     tcpClientSocket->doConnect();
-    tcpClientSocket->requestOrderbook();
+    if(isConnected)
+    {
+        tcpClientSocket->requestOrderbook();
+    }
 }
 
 MEX_Main::~MEX_Main()
@@ -118,6 +125,7 @@ void MEX_Main::changeToConnected()
 
 void MEX_Main::changeToDisconnected()
 {
+    clearTables();
     ui->lblConnectionStatus->setText("Disconnected");
     ui->btnDisconnect->setDisabled(true);
     ui->btnConnect->setEnabled(true);
@@ -366,7 +374,7 @@ void MEX_Main::executeOrder()
     QRegExp quatntityRegEx("[1-9]{1}[0-9]{0,3}");
     QRegExp valueRegEx("([0-9]{1,5}[\\.][0-9]{1,3})|([1-9]{1}[0-9]{0,3})");
 
-    if(valueRegEx.exactMatch(ui->edtValue->text().replace(",",".")) && quatntityRegEx.exactMatch(ui->edtQuantity->text()))
+    if(valueRegEx.exactMatch(ui->edtValue->text().replace(",",".")) && quatntityRegEx.exactMatch(ui->edtQuantity->text()) && isConnected)
     {
         double value = ui->edtValue->text().replace(",",".").toDouble();
         int quantity = ui->edtQuantity->text().toInt();
@@ -387,16 +395,18 @@ void MEX_Main::executeOrder()
     }
 }
 
+void MEX_Main::intitializeLogFile()
+{
+    QString filename = username+"_"+date.currentDateTime().toString("dd.MM.yyyy");
+    logFile.setFileName(filename+".log");
+}
+
 void MEX_Main::logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment)
 {
-    QDateTime date;
     QString output = date.currentDateTime().toString()+" - "+ordertype+" | "+productIndex+" | "+productsymbol+" | "+QString::number(quantity)+"@"+QString::number(value)+" | Comment: "+comment+"\n";
-    QString filename = username+"_"+date.currentDateTime().toString("dd.MM.yyyy");
-    QFile outFile(filename+".log");
-
-    outFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
-    QTextStream textStream(&outFile);
-    textStream<<output<<flush;
+    logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+    QTextStream logStream(&logFile);
+    logStream<<output<<flush;
 }
 
 //Get current filter settings and refresh the tables
@@ -421,7 +431,10 @@ void MEX_Main::on_btnShow_clicked()
         {
             selectedUsers = userID;
         }
-        tcpClientSocket->requestOrderbook();
+        if(isConnected)
+        {
+            tcpClientSocket->requestOrderbook();
+        }
     }
     else
     {
@@ -429,7 +442,7 @@ void MEX_Main::on_btnShow_clicked()
     }
 }
 
-void MEX_Main::refreshTable()
+void MEX_Main::clearTables()
 {
     //Remove all current rows from tablewidget
     while (ui->tableWidgetOrderbookSell->rowCount() > 0)
@@ -441,6 +454,11 @@ void MEX_Main::refreshTable()
     {
         ui->tableWidgetOrderbookBuy->removeRow(0);
     }
+}
+
+void MEX_Main::refreshTable()
+{
+    clearTables();
     //Iterator that goes through all orders
     QList<MEX_Order>::iterator orderbookIterator;
     //Set products for all orders by looking up porduct symbol
@@ -467,7 +485,6 @@ void MEX_Main::refreshTable()
                 //Count number of rows
                 newRow = ui->tableWidgetOrderbookSell->rowCount();
                 //Insert new Row at end of widget
-
                 ui->tableWidgetOrderbookSell->insertRow(newRow);
                 ui->tableWidgetOrderbookSell->setItem(newRow, 0,new QTableWidgetItem((*orderbookIterator).getProduct().getIndex()));
                 ui->tableWidgetOrderbookSell->setItem(newRow, 1,new QTableWidgetItem((*orderbookIterator).getProduct().getSymbol()));
@@ -476,6 +493,19 @@ void MEX_Main::refreshTable()
                 ui->tableWidgetOrderbookSell->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getValue())));
                 ui->tableWidgetOrderbookSell->setItem(newRow, 5,new QTableWidgetItem((*orderbookIterator).getComment()));
                 ui->tableWidgetOrderbookSell->setItem(newRow, 6,new QTableWidgetItem((*orderbookIterator).getTime().toString("hh:mm:ss.zzz")));
+                //Highlight updated items
+                if((*orderbookIterator).getUpdated() != 0)
+                {
+                    if((*orderbookIterator).getUpdated() == 7)
+                    {
+                        for(int i = 0; i < 7; i++)
+                            ui->tableWidgetOrderbookSell->item(newRow,i)->setBackgroundColor(QColor(0,255,0,120));
+                    }
+                    else
+                    {
+                        ui->tableWidgetOrderbookSell->item(newRow,(*orderbookIterator).getUpdated())->setBackgroundColor(QColor(0,255,0,120));
+                    }
+                }
             }
         }
         else if((*orderbookIterator).getOrdertype() == "BUY")
@@ -492,6 +522,20 @@ void MEX_Main::refreshTable()
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getValue())));
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 5,new QTableWidgetItem((*orderbookIterator).getComment()));
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 6,new QTableWidgetItem((*orderbookIterator).getTime().toString("hh:mm:ss.zzz")));
+                if((*orderbookIterator).getUpdated() != 0)
+                {
+                    if((*orderbookIterator).getUpdated() == 7)
+                    {
+                        for(int i = 0; i < 7; i++)
+                        {
+                            ui->tableWidgetOrderbookBuy->item(newRow,i)->setBackgroundColor(QColor(0,255,0,120));
+                        }
+                    }
+                    else
+                    {
+                        ui->tableWidgetOrderbookBuy->item(newRow,(*orderbookIterator).getUpdated())->setBackgroundColor(QColor(0,255,0,120));
+                    }
+                }
             }
         }
     }

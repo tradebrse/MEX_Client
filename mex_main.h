@@ -85,6 +85,10 @@ private slots:
 
     void logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment);
 
+    void clearTables();
+
+    void intitializeLogFile();
+
 private:
     Ui::MEX_Main *ui;
 
@@ -128,9 +132,14 @@ private:
     bool isConnected;
 
     QString selectedProducts;
+
     QString selectedUsers;
 
     QList<MEX_Order> myOrders;
+
+    QDateTime date;
+
+    QFile logFile;
 protected:
 
 };

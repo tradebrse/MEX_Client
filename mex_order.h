@@ -22,6 +22,7 @@ public:
     QDateTime getTime();
     QString getComment();
     MEX_Product getProduct();
+    int getUpdated() const;
     //Setter methods
     void setTraderID(QString);
     void setOrderID(int);
@@ -31,7 +32,7 @@ public:
     void setProduct(MEX_Product);
     void setOrdertype(QString);
     void setTime(QDateTime);
-
+    void setUpdated(int);
 private:
     QString traderID;
     int orderID;
@@ -41,6 +42,6 @@ private:
     QDateTime time;
     QString ordertype;
     MEX_Product product;
-
+    int updated;
 };
 #endif //MEX_ORDER_H
