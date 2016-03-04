@@ -137,6 +137,16 @@ void MEX_Main::updateOrderLists(QList<MEX_Order> currentOrderbook, QList<MEX_Ord
     this->currentOrderbook = currentOrderbook;
     refreshTable();
     this->myOrders = matchedOrders;
+
+    //End timer
+    if(timer.isValid())
+    {
+        qint64 nanoSec;
+        nanoSec = timer.nsecsElapsed();
+        double ms;
+        ms = nanoSec/1000000;
+        qDebug() << ms << " ms | " << nanoSec << " nanoseconds" << endl;
+    }
 }
 
 void MEX_Main::on_btnLogOut_clicked()
@@ -328,15 +338,18 @@ void MEX_Main::loadTrader()
 
 void MEX_Main::on_btnExecute_clicked()
 {
-    if(this->isConnected)
-    {
-        executeOrder();
-        refreshTable();
-    }
-    else
-    {
-        QMessageBox::information(0,"Execution failed","The client is not connected to the server.");
-    }
+        if(this->isConnected)
+        {
+            //Start timestamp timer
+            timer.start();
+
+            executeOrder();
+            refreshTable();
+        }
+        else
+        {
+            QMessageBox::information(0,"Execution failed","The client is not connected to the server.");
+        }
 }
 
 //Gather trade information and send over tcp client
@@ -407,6 +420,7 @@ void MEX_Main::logOrder(QString ordertype, QString productIndex, QString product
     logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
     QTextStream logStream(&logFile);
     logStream<<output<<flush;
+    logFile.close();
 }
 
 //Get current filter settings and refresh the tables

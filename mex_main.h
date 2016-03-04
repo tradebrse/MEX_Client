@@ -15,6 +15,7 @@
 #include <QVarLengthArray>
 #include <QtSql>
 #include <QRegExp>
+#include <QElapsedTimer>
 
 namespace Ui {
 class MEX_Main;
@@ -140,6 +141,8 @@ private:
     QDateTime date;
 
     QFile logFile;
+
+    QElapsedTimer timer;
 protected:
 
 };
