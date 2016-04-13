@@ -12,7 +12,6 @@ MEX_TradeLog::MEX_TradeLog(QList<MEX_Order>& myOrders, QString& userID, QWidget 
     //Make table sortable
     connect(ui->tableWidgetMatchedOrders->horizontalHeader(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)), this, SLOT(sortMatchedOrdersTable(int,Qt::SortOrder)));
 
-    //Matched Orders in SQL speichern und hier abrufen?
     while (ui->tableWidgetMatchedOrders->rowCount() > 0)
     {
         ui->tableWidgetMatchedOrders->removeRow(0); //Remove all current rows from tablewidget
@@ -46,8 +45,6 @@ ui->tableWidgetMatchedOrders->sortItems(column,order);
 
 void MEX_TradeLog::on_bntClear_clicked()
 {
-    //WEITERARBEITEN: clear löscht auch column titel, nur alle zeilen löschen
-    // ui->tableWidgetMatchedOrders->clear();
     while (ui->tableWidgetMatchedOrders->rowCount() > 0)
     {
         ui->tableWidgetMatchedOrders->removeRow(0); //Remove all current rows from tablewidget

@@ -151,6 +151,7 @@ void MEX_Main::updateOrderLists(QList<MEX_Order> currentOrderbook, QList<MEX_Ord
 
 void MEX_Main::on_btnLogOut_clicked()
 {
+    tcpClientSocket->doDisconnect();
     logOutUser();
 }
 

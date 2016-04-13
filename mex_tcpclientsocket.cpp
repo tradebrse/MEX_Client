@@ -1,5 +1,5 @@
 #include "mex_tcpclientsocket.h"
-
+#include <qhostaddress.h>
 MEX_TCPClientSocket::MEX_TCPClientSocket(QString traderID, QObject *parent) :
     QObject(parent)
 {
@@ -15,6 +15,7 @@ void MEX_TCPClientSocket::doConnect()
     connect(socket,SIGNAL(readyRead()),this, SLOT(readServerData()));
 
     socket->connectToHost("127.0.0.1", 1234);
+
     xmlWriter.setAutoFormatting(true);
     if(socket->waitForConnected(10000)){
         emit clientConnected();
