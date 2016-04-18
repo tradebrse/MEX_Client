@@ -411,7 +411,7 @@ void MEX_Main::executeOrder()
 
 void MEX_Main::intitializeLogFile()
 {
-    QString filename = username+"_"+date.currentDateTime().toString("dd.MM.yyyy");
+    QString filename = username+"_"+date.currentDateTime().toString("yyyy.MM.dd");
     logFile.setFileName(filename+".log");
 }
 

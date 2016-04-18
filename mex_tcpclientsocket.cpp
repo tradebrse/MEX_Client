@@ -66,7 +66,7 @@ void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity
     xmlWriter.writeEndDocument();
 
     //Wait till order was sent
-    socket->waitForBytesWritten(-1); //Eventuell ander Zeit setzen - If msecs is -1, this function will not time out.
+    socket->waitForBytesWritten(-1); ///Eventuell anders Zeit setzen - If msecs is -1, this function will not time out.
 }
 
 void MEX_TCPClientSocket::requestOrderbook()

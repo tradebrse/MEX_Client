@@ -54,16 +54,10 @@ private:
 
     QCryptographicHash* hash;
 
-    //--------//
     // SQL-DB //
-    //--------//
-
     QSqlDatabase db;
 
-    //---------------//
     // Username List //
-    //---------------//
-
     QStringList userList;
 
     QNetworkProxy proxy;
