@@ -13,6 +13,7 @@ public:
     bool operator <(const QTableWidgetItem &other) const;
     bool operator ==(const QTableWidgetItem &other) const;
     bool operator >(const QTableWidgetItem &other) const;
+
 };
 
 #endif // MEX_TABLEWIDGETITEM_H

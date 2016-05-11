@@ -29,8 +29,10 @@ signals:
     void clientConnected();
     void clientDisconnected();
     void serverDataToGUI(QList<MEX_Order> currentOrderbook, QList<MEX_Order> matchedOrders);
+    void exchangeStatusChanged(bool);
 public slots:
     void readServerData();
+    void writeRawData(QByteArray);
 private slots:
     void readOrders(QList<MEX_Order>& orderbook);
 private:

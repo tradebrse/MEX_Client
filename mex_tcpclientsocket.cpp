@@ -1,5 +1,5 @@
 #include "mex_tcpclientsocket.h"
-#include <qhostaddress.h>
+#include <QDebug>
 MEX_TCPClientSocket::MEX_TCPClientSocket(QString traderID, QObject *parent) :
     QObject(parent)
 {
@@ -19,13 +19,22 @@ void MEX_TCPClientSocket::doConnect()
     xmlWriter.setAutoFormatting(true);
     if(socket->waitForConnected(10000)){
         emit clientConnected();
-        //Send empty order to give traderID information to server
-        sendOrder(this->traderID,0,0,"","","");
+        //Request orderbook and send trader ID
+        requestOrderbook();
     }
     else
     {
         QMessageBox::warning(0,"Connection Error",socket->errorString());
         emit clientDisconnected();
+    }
+}
+
+void MEX_TCPClientSocket::writeRawData(QByteArray data)
+{
+    if(socket->state() == QTcpSocket::ConnectedState)
+    {
+        socket->write(data);
+        socket->waitForBytesWritten(-1);
     }
 }
 
@@ -66,21 +75,17 @@ void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity
     xmlWriter.writeEndDocument();
 
     //Wait till order was sent
-    socket->waitForBytesWritten(-1); ///Eventuell anders Zeit setzen - If msecs is -1, this function will not time out.
+    socket->waitForBytesWritten(100); ///Eventuell andere Zeit setzen - If msecs is -1, this function will not time out.
+    if(socket->bytesToWrite() > 0)
+    {
+        QMessageBox::warning(0,"Error","Could not send all data.");
+    }
 }
 
 void MEX_TCPClientSocket::requestOrderbook()
 {
-    //Write the XML to this socket
-    xmlWriter.setDevice(socket);
-    //Write start of document and set Order tag
-    xmlWriter.writeStartDocument();
-    xmlWriter.writeStartElement("Orderbook");
-    //Close tag Order
-    xmlWriter.writeEndElement();
-    //Close document
-    xmlWriter.writeEndDocument();
-    socket->waitForBytesWritten(-1); //Eventuell ander Zeit setzen - If msecs is -1, this function will not time out.
+    //Send empty order to give traderID information to server
+    sendOrder(this->traderID,0,0,"","","");
 }
 
 
@@ -103,45 +108,61 @@ void MEX_TCPClientSocket::readServerData()
             socket->flush();
         }
     }
-    //Declare and initialize matched orders list
-    QList<MEX_Order>  matchedOrders;
-    //Declare and initialize order book
-    QList<MEX_Order>  currentOrderbook;
-    //Convert orderbook data to list of orders
-    xmlReader = new QXmlStreamReader(data);
-    while(!xmlReader->atEnd())
+
+    QString dataString = QString(data);
+    if(dataString.left(3) == "SOD")
     {
-        //Read line
-        xmlReader->readNext();
-        if(xmlReader->isStartElement())
+        emit exchangeStatusChanged(true);
+        data = dataString.mid(3).toUtf8();
+    }
+    else if(dataString.left(3) == "EOD")
+    {
+        emit exchangeStatusChanged(false);
+        data = dataString.mid(3).toUtf8();
+    }
+    //Read Orderlists
+    if(dataString.right(13).contains("Orderlists"))
+    {
+        //Declare and initialize matched orders list
+        QList<MEX_Order>  matchedOrders;
+        //Declare and initialize order book
+        QList<MEX_Order>  currentOrderbook;
+        //Convert orderbook data to list of orders
+        xmlReader = new QXmlStreamReader(data);
+        while(!xmlReader->atEnd())
         {
-            if(xmlReader->name() == "Orderlists")
+            //Read line
+            xmlReader->readNext();
+            if(xmlReader->isStartElement())
             {
-                while(!xmlReader->atEnd())
+                if(xmlReader->name() == "Orderlists")
                 {
-                    xmlReader->readNext();
-                    if(xmlReader->isStartElement())
+                    while(!xmlReader->atEnd())
                     {
-                        if(xmlReader->name() == "Orderbook")
+                        xmlReader->readNext();
+                        if(xmlReader->isStartElement())
                         {
-                            readOrders(currentOrderbook);
-                        }
-                        else if(xmlReader->name() == "MatchedOrders")
-                        {
-                            readOrders(matchedOrders);
+                            if(xmlReader->name() == "Orderbook")
+                            {
+                                readOrders(currentOrderbook);
+                            }
+                            else if(xmlReader->name() == "MatchedOrders")
+                            {
+                                readOrders(matchedOrders);
+                            }
                         }
                     }
                 }
-            }
-            else
-            {
-                //No relevant data found
-                QMessageBox::warning(0,"Unvalid data","Could not receive valid data from the server.");
+                else
+                {
+                    //No relevant data found
+                    QMessageBox::warning(0,"Unvalid data","Could not receive valid data from the server.");
+                }
             }
         }
+        //Send new orderbook from server to GUI application
+        emit serverDataToGUI(currentOrderbook, matchedOrders);
     }
-    //Send new orderbook from server to GUI application
-    emit serverDataToGUI(currentOrderbook, matchedOrders);
 }
 
 void MEX_TCPClientSocket::readOrders(QList<MEX_Order>  &orderbook)

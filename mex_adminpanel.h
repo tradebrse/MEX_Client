@@ -1,3 +1,4 @@
+void on_bntEOD1_clicked();
 #ifndef MEX_ADMINPANEL_H
 #define MEX_ADMINPANEL_H
 
@@ -20,6 +21,11 @@ public:
     //Constructor / Deconstructor
     explicit MEX_AdminPanel(QWidget *parent = 0); //QWidget *parent = 0
     ~MEX_AdminPanel();
+
+    void setExchangeStatus(bool open);
+
+signals:
+    void changeExchangeStatus(QByteArray);
 
 private slots:
 
@@ -61,6 +67,10 @@ private slots:
 
     void on_btnChangePW_clicked();
 
+    void on_btnSOD_clicked();
+
+    void on_btnEOD_clicked();
+
 private:
     Ui::MEX_AdminPanel *ui;
 
@@ -75,6 +85,8 @@ private:
     QStringList productIndexList;
 
     QCryptographicHash* hash;
+
+    bool open;
 };
 
 #endif // MEX_ADMINPANEL_H

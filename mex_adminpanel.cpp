@@ -1,4 +1,3 @@
-#include "mex_AdminPanel.h"
 #include "mex_adminpanel.h"
 #include "ui_mex_adminpanel.h"
 // Constructor/Deconstructor
@@ -6,7 +5,7 @@
 MEX_AdminPanel::MEX_AdminPanel(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MEX_AdminPanel)
-{
+{  
     ui->setupUi(this);
     //Set fixed window size
     this->setFixedSize(this->size());
@@ -381,3 +380,26 @@ void MEX_AdminPanel::closeDB()
     db.removeDatabase(connection);
 }
 
+void MEX_AdminPanel::on_btnSOD_clicked()
+{  
+    if(!open)
+    {
+        emit changeExchangeStatus(QString("SOD").toUtf8());
+        open = true;
+    }
+}
+
+
+void MEX_AdminPanel::on_btnEOD_clicked()
+{
+    if(open)
+    {
+        emit changeExchangeStatus(QString("EOD").toUtf8());
+        open = false;
+    }
+}
+
+void MEX_AdminPanel::setExchangeStatus(bool open)
+{
+    this->open = open;
+}

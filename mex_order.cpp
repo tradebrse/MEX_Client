@@ -73,6 +73,10 @@ int MEX_Order::getUpdated() const
 {
     return this->updated;
 }
+bool MEX_Order::isTradable() const
+{
+    return this->tradable;
+}
 
 //Setter methods
 void MEX_Order::setTraderID(QString traderID)
@@ -110,4 +114,8 @@ void MEX_Order::setTime(QDateTime time)
 void MEX_Order::setUpdated(int updated)
 {
     this->updated = updated;
+}
+void MEX_Order::setTradable(bool tradable)
+{
+    this->tradable = tradable;
 }

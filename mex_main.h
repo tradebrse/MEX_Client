@@ -16,6 +16,7 @@
 #include <QtSql>
 #include <QRegExp>
 #include <QElapsedTimer>
+#include <QVBoxLayout>
 
 namespace Ui {
 class MEX_Main;
@@ -29,7 +30,6 @@ public:
     // Constructor/Deconstructor
     explicit MEX_Main(QString, QWidget *parent = 0);
     ~MEX_Main();
-
 signals:
 
 private slots:
@@ -78,6 +78,8 @@ private slots:
 
     void changeToDisconnected();
 
+    void changeExchangeStatus(bool);
+
     void updateOrderLists(QList<MEX_Order> currentOrderbook, QList<MEX_Order> matchedOrders);
 
     void sortSellTable(int column, Qt::SortOrder order);
@@ -89,6 +91,10 @@ private slots:
     void clearTables();
 
     void intitializeLogFile();
+
+    void customMenuRequested(QPoint pos);
+
+    void cancelOrder();
 
 private:
     Ui::MEX_Main *ui;
@@ -143,6 +149,15 @@ private:
     QFile logFile;
 
     QElapsedTimer timer;
+
+    bool open;
+
+    QTableWidgetItem * currentItem;
+
+    QMenu *menu;
+
+    QAction *cancelOrderAction;
+
 protected:
 
 };

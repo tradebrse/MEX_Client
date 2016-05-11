@@ -11,11 +11,17 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     ///this->showMaximized();
     this->setFixedSize(this->size());
 
+    //Set MEX Logo
+    QPixmap pixMEX(QApplication::applicationDirPath() + "/mex1.png");
+    ui->lblTradingGUI->setPixmap(pixMEX);
 
     //Set checked buttons for application start
     ui->radioButtonBuy->setChecked(true);
     ui->radioButtonAll->setChecked(true);
     ui->checkBoxAllProducts->setChecked(true);
+
+    //Set connection label color
+    ui->lblExchangeStatus->setStyleSheet("QLabel {color : red;}");
 
     //connect checkbox to combobox
     connect(ui->checkBoxAllProducts, SIGNAL(clicked(bool)), ui->cBoxProductShow, SLOT(setDisabled(bool)));
@@ -27,6 +33,15 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     //Connect column clicks to sort function
     connect(ui->tableWidgetOrderbookSell->horizontalHeader(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)), this, SLOT(sortSellTable(int,Qt::SortOrder)));
     connect(ui->tableWidgetOrderbookBuy->horizontalHeader(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)), this, SLOT(sortBuyTable(int,Qt::SortOrder)));
+
+    //Create contextmenu for table widgets | BUY Table
+    QVBoxLayout *layout=new QVBoxLayout(); //(this)
+    ui->tableWidgetOrderbookBuy->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->tableWidgetOrderbookSell->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->tableWidgetOrderbookBuy, SIGNAL(customContextMenuRequested(QPoint)),SLOT(customMenuRequested(QPoint)));
+    connect(ui->tableWidgetOrderbookSell, SIGNAL(customContextMenuRequested(QPoint)),SLOT(customMenuRequested(QPoint)));
+    layout->addWidget(ui->tableWidgetOrderbookBuy);
+    layout->addWidget(ui->tableWidgetOrderbookSell);
 
     //Delete main window when closed on logout
     this->setAttribute(Qt::WA_DeleteOnClose);
@@ -87,14 +102,11 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
 
     connect(tcpClientSocket,SIGNAL(clientConnected()),this,SLOT(changeToConnected()));
     connect(tcpClientSocket,SIGNAL(clientDisconnected()),this,SLOT(changeToDisconnected()));
+    connect(tcpClientSocket,SIGNAL(exchangeStatusChanged(bool)),this,SLOT(changeExchangeStatus(bool)));
     connect(tcpClientSocket,SIGNAL(serverDataToGUI(QList<MEX_Order>, QList<MEX_Order>)), this,SLOT(updateOrderLists(QList<MEX_Order>, QList<MEX_Order>)));
 
     //Start connection
     tcpClientSocket->doConnect();
-    if(isConnected)
-    {
-        tcpClientSocket->requestOrderbook();
-    }
 }
 
 MEX_Main::~MEX_Main()
@@ -118,6 +130,7 @@ void MEX_Main::on_btnDisconnect_clicked()
 void MEX_Main::changeToConnected()
 {
     ui->lblConnectionStatus->setText("Connected");
+    ui->lblConnectionStatus->setStyleSheet("QLabel {color : green;}");
     ui->btnConnect->setDisabled(true);
     ui->btnDisconnect->setEnabled(true);
     this->isConnected = true;
@@ -126,10 +139,28 @@ void MEX_Main::changeToConnected()
 void MEX_Main::changeToDisconnected()
 {
     clearTables();
+    changeExchangeStatus(false);
     ui->lblConnectionStatus->setText("Disconnected");
+    ui->lblConnectionStatus->setStyleSheet("QLabel {color : red;}");
     ui->btnDisconnect->setDisabled(true);
     ui->btnConnect->setEnabled(true);
     this->isConnected = false;
+}
+
+//Set current exchange status
+void MEX_Main::changeExchangeStatus(bool open)
+{
+    this->open = open;
+    if(open)
+    {
+        ui->lblExchangeStatus->setStyleSheet("QLabel {color : green;}");
+        ui->lblExchangeStatus->setText("Trading open");
+    }
+    else
+    {
+        ui->lblExchangeStatus->setStyleSheet("QLabel {color : red;}");
+        ui->lblExchangeStatus->setText("Trading closed");
+    }
 }
 
 void MEX_Main::updateOrderLists(QList<MEX_Order> currentOrderbook, QList<MEX_Order> matchedOrders)
@@ -178,7 +209,9 @@ void MEX_Main::openAdminPanel()
     connect( adminPanelWidget, SIGNAL(destroyed()), this, SLOT(loadTrader()));
     connect( adminPanelWidget, SIGNAL(destroyed()), this, SLOT(readProductDB()));
     connect( this, SIGNAL(destroyed()), adminPanelWidget, SLOT(close()));
+    connect(adminPanelWidget, SIGNAL(changeExchangeStatus(QByteArray)), tcpClientSocket, SLOT(writeRawData(QByteArray)));
     adminPanelWidget->show();
+    adminPanelWidget->setExchangeStatus(open);
     this->setDisabled(true);
 }
 
@@ -339,23 +372,28 @@ void MEX_Main::loadTrader()
 
 void MEX_Main::on_btnExecute_clicked()
 {
-        if(this->isConnected)
-        {
-            //Start timestamp timer
-            timer.start();
+    if(this->isConnected && ui->lblExchangeStatus->text() == "Trading open")
+    {
+        //Start timestamp timer
+        timer.start();
 
-            executeOrder();
-            refreshTable();
-        }
-        else
-        {
-            QMessageBox::information(0,"Execution failed","The client is not connected to the server.");
-        }
+        executeOrder();
+        refreshTable();
+    }
+    else if(!this->isConnected)
+    {
+        QMessageBox::information(0,"Execution failed","The client is not connected to the server.");
+    }
+    else if(this->isConnected && ui->lblExchangeStatus->text() == "Trading closed")
+    {
+        QMessageBox::information(0,"Execution failed","The exchange is currently closed");
+    }
 }
 
 //Gather trade information and send over tcp client
 void MEX_Main::executeOrder()
 {
+
     QString ordertype;
     if(ui->radioButtonSell->isChecked())
     {
@@ -409,6 +447,15 @@ void MEX_Main::executeOrder()
     }
 }
 
+//Send the cancel order to the server
+void MEX_Main::cancelOrder()
+{
+    if(currentItem->isSelected() && currentItem->tableWidget()->item(currentItem->row(),2)->text().toInt() > 0)
+    {
+        tcpClientSocket->writeRawData(("Cancel_"+currentItem->tableWidget()->item(currentItem->row(),2)->text()).toUtf8());
+    }
+}
+
 void MEX_Main::intitializeLogFile()
 {
     QString filename = username+"_"+date.currentDateTime().toString("yyyy.MM.dd");
@@ -429,7 +476,7 @@ void MEX_Main::on_btnShow_clicked()
 {
     if(this->isConnected)
     {
-        if(ui->checkBoxAllProducts->isChecked() == true)
+        if(ui->checkBoxAllProducts->isChecked())
         {
             selectedProducts = "ALL";
         }
@@ -438,11 +485,11 @@ void MEX_Main::on_btnShow_clicked()
             selectedProducts = ui->cBoxProductShow->currentText();
         }
 
-        if(ui->radioButtonAll->isChecked() == true)
+        if(ui->radioButtonAll->isChecked())
         {
             selectedUsers = "ALL";
         }
-        else if(ui->radioButtonMine->isChecked() == true)
+        else if(ui->radioButtonMine->isChecked())
         {
             selectedUsers = userID;
         }
@@ -503,7 +550,15 @@ void MEX_Main::refreshTable()
                 ui->tableWidgetOrderbookSell->insertRow(newRow);
                 ui->tableWidgetOrderbookSell->setItem(newRow, 0,new QTableWidgetItem((*orderbookIterator).getProduct().getIndex()));
                 ui->tableWidgetOrderbookSell->setItem(newRow, 1,new QTableWidgetItem((*orderbookIterator).getProduct().getSymbol()));
-                ui->tableWidgetOrderbookSell->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
+                //Set order ID if only user orders selected
+                if(selectedUsers == (*orderbookIterator).getTraderID())
+                {
+                    ui->tableWidgetOrderbookSell->setItem(newRow, 2,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getOrderID())));
+                }
+                else
+                {
+                    ui->tableWidgetOrderbookSell->setItem(newRow, 2,new MEX_TableWidgetItem(""));
+                }
                 ui->tableWidgetOrderbookSell->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getQuantity())));
                 ui->tableWidgetOrderbookSell->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getValue())));
                 ui->tableWidgetOrderbookSell->setItem(newRow, 5,new QTableWidgetItem((*orderbookIterator).getComment()));
@@ -511,11 +566,13 @@ void MEX_Main::refreshTable()
                 //Highlight updated items
                 if((*orderbookIterator).getUpdated() != 0)
                 {
+                    //Highlight all columns of the row / order
                     if((*orderbookIterator).getUpdated() == 7)
                     {
                         for(int i = 0; i < 7; i++)
                             ui->tableWidgetOrderbookSell->item(newRow,i)->setBackgroundColor(QColor(0,255,0,120));
                     }
+                    //Highlight quantity only
                     else
                     {
                         ui->tableWidgetOrderbookSell->item(newRow,(*orderbookIterator).getUpdated())->setBackgroundColor(QColor(0,255,0,120));
@@ -532,7 +589,14 @@ void MEX_Main::refreshTable()
                 ui->tableWidgetOrderbookBuy->insertRow(newRow);
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 0,new QTableWidgetItem((*orderbookIterator).getProduct().getIndex()));
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 1,new QTableWidgetItem((*orderbookIterator).getProduct().getSymbol()));
-                ui->tableWidgetOrderbookBuy->setItem(newRow, 2,new MEX_TableWidgetItem("0"));
+                if(selectedUsers == (*orderbookIterator).getTraderID())
+                {
+                    ui->tableWidgetOrderbookBuy->setItem(newRow, 2,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getOrderID())));
+                }
+                else
+                {
+                    ui->tableWidgetOrderbookBuy->setItem(newRow, 2,new MEX_TableWidgetItem(""));
+                }
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getQuantity())));
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getValue())));
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 5,new QTableWidgetItem((*orderbookIterator).getComment()));
@@ -565,6 +629,38 @@ void MEX_Main::sortSellTable(int column, Qt::SortOrder order)
 void MEX_Main::sortBuyTable(int column, Qt::SortOrder order)
 {
     ui->tableWidgetOrderbookBuy->sortItems(column,order);
+}
+
+//Activate contextmenu
+void MEX_Main::customMenuRequested(QPoint pos){
+    //Set contextmenu for Buy Widget
+    if(ui->tableWidgetOrderbookBuy->selectedItems().length() == 1)
+    {
+        QModelIndex index=ui->tableWidgetOrderbookBuy->indexAt(pos);
+
+        menu =new QMenu(this);
+        cancelOrderAction = new QAction("Cancel Order", this);
+        menu->addAction(cancelOrderAction);
+        menu->popup(ui->tableWidgetOrderbookBuy->viewport()->mapToGlobal(pos));
+
+        currentItem = ui->tableWidgetOrderbookBuy->item(index.row(),index.column());///oder 2
+
+        connect(cancelOrderAction, SIGNAL(triggered()), this, SLOT(cancelOrder()));
+    }
+    //Set contextmenu for Sell Widget
+    else if(ui->tableWidgetOrderbookSell->selectedItems().length() == 1)
+    {
+        QModelIndex index=ui->tableWidgetOrderbookSell->indexAt(pos);
+
+        menu =new QMenu(this);
+        cancelOrderAction = new QAction("Cancel Order", this);
+        menu->addAction(cancelOrderAction);
+        menu->popup(ui->tableWidgetOrderbookSell->viewport()->mapToGlobal(pos));
+
+        currentItem = ui->tableWidgetOrderbookSell->item(index.row(),index.column());///oder 2
+
+        connect(cancelOrderAction, SIGNAL(triggered()), this, SLOT(cancelOrder()));
+    }
 }
 
 //SQL database query execution

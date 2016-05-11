@@ -16,6 +16,7 @@ MEX_Login::MEX_Login(QWidget *parent) :
     db.setDatabaseName(dbPath);
 
     //Connect buttons to RETURN key
+    connect(ui->edtUser, SIGNAL(returnPressed()),ui->btnLogIn,SIGNAL(clicked()));
     connect(ui->edtPassword, SIGNAL(returnPressed()),ui->btnLogIn,SIGNAL(clicked()));
     connect(ui->edtConfirmPassword, SIGNAL(returnPressed()),ui->btnSignUp,SIGNAL(clicked()));
 }

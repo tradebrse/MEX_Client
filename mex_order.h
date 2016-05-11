@@ -23,6 +23,8 @@ public:
     QString getComment();
     MEX_Product getProduct();
     int getUpdated() const;
+    bool isTradable() const;
+
     //Setter methods
     void setTraderID(QString);
     void setOrderID(int);
@@ -33,6 +35,8 @@ public:
     void setOrdertype(QString);
     void setTime(QDateTime);
     void setUpdated(int);
+    void setTradable(bool);
+
 private:
     QString traderID;
     int orderID;
@@ -43,5 +47,6 @@ private:
     QString ordertype;
     MEX_Product product;
     int updated;
+    bool tradable;
 };
 #endif //MEX_ORDER_H
