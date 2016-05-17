@@ -26,6 +26,10 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     //connect checkbox to combobox
     connect(ui->checkBoxAllProducts, SIGNAL(clicked(bool)), ui->cBoxProductShow, SLOT(setDisabled(bool)));
 
+    //Connect GTD checkbox to calender dialog and set line edit Read Only
+    connect(ui->cBoxGTD, SIGNAL(toggled(bool)),this, SLOT(openCalendarDialog(bool)));
+    ui->edtDate->setReadOnly(true);
+
     //connect column clicks to sort functions
     //Order the tables by time
     ui->tableWidgetOrderbookSell->sortItems(6);
@@ -145,6 +149,34 @@ void MEX_Main::changeToDisconnected()
     ui->btnDisconnect->setDisabled(true);
     ui->btnConnect->setEnabled(true);
     this->isConnected = false;
+}
+
+void MEX_Main::openCalendarDialog(bool active)
+{
+    if(active)
+    {
+        dialogGTD = new QDialog(this);
+        dialogGTD->setWindowTitle("Calendar");
+        calendar = new QCalendarWidget(dialogGTD);
+        connect(calendar, SIGNAL(clicked(QDate)), this, SLOT(setGTD(QDate)));
+        QVBoxLayout *extensionLayout = new QVBoxLayout;
+        extensionLayout->setMargin(0);
+        extensionLayout->addWidget(calendar);
+        dialogGTD->setLayout(extensionLayout);
+        dialogGTD->show();
+        ui->edtDate->setText(QDate::currentDate().toString(Qt::ISODate));
+    }
+    else
+    {
+        delete calendar;
+        delete dialogGTD;
+        ui->edtDate->setText("");
+    }
+}
+
+void MEX_Main::setGTD(QDate date)
+{
+    ui->edtDate->setText(date.toString(Qt::ISODate));
 }
 
 //Set current exchange status
@@ -423,10 +455,36 @@ void MEX_Main::executeOrder()
     }
 
     //Set regular expressions for value and quantity
-    QRegExp quatntityRegEx("[1-9]{1}[0-9]{0,3}");
+    QRegExp quantityRegEx("[1-9]{1}[0-9]{0,3}");
     QRegExp valueRegEx("([0-9]{1,5}[\\.][0-9]{1,3})|([1-9]{1}[0-9]{0,3})");
+    QDate dateGTD;
+    bool dateValid = false;
 
-    if(valueRegEx.exactMatch(ui->edtValue->text().replace(",",".")) && quatntityRegEx.exactMatch(ui->edtQuantity->text()) && isConnected)
+    if(ui->cBoxGTD->isChecked())
+    {
+        dateGTD = QDate::fromString(ui->edtDate->text(),Qt::ISODate);
+        if(dateGTD < QDate::currentDate())
+        {
+            QMessageBox::information(0,"Invalid input","Inavlid date.");
+        }
+        else
+        {
+            dateValid = true;
+        }
+    }
+
+    if(valueRegEx.exactMatch(ui->edtValue->text().replace(",",".")) && quantityRegEx.exactMatch(ui->edtQuantity->text()) && dateValid && isConnected)
+    {
+        double value = ui->edtValue->text().replace(",",".").toDouble();
+        int quantity = ui->edtQuantity->text().toInt();
+        QString comment = ui->edtComment->text();
+        QString stringGTD = ui->edtDate->text();
+
+        logOrder(ordertype, productIndex, productSymbol, quantity, value, comment, stringGTD);
+
+        tcpClientSocket->sendOrder(traderID, value, quantity, comment, productSymbol, ordertype, stringGTD);
+    }
+    else if(valueRegEx.exactMatch(ui->edtValue->text().replace(",",".")) && quantityRegEx.exactMatch(ui->edtQuantity->text()) && !ui->cBoxGTD->isChecked() && isConnected)
     {
         double value = ui->edtValue->text().replace(",",".").toDouble();
         int quantity = ui->edtQuantity->text().toInt();
@@ -436,12 +494,11 @@ void MEX_Main::executeOrder()
 
         tcpClientSocket->sendOrder(traderID, value, quantity, comment, productSymbol, ordertype);
     }
-
     else if(!valueRegEx.exactMatch(ui->edtValue->text()))
     {
         QMessageBox::information(0,"Invalid input","Inavlid value.");
     }
-    else if(!quatntityRegEx.exactMatch(ui->edtQuantity->text()))
+    else if(!quantityRegEx.exactMatch(ui->edtQuantity->text()))
     {
         QMessageBox::information(0,"Invalid input","Invalid quantity.");
     }
@@ -462,9 +519,19 @@ void MEX_Main::intitializeLogFile()
     logFile.setFileName(filename+".log");
 }
 
+//Write Order to user logfile
 void MEX_Main::logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment)
 {
     QString output = date.currentDateTime().toString()+" - "+ordertype+" | "+productIndex+" | "+productsymbol+" | "+QString::number(quantity)+"@"+QString::number(value)+" | Comment: "+comment+"\n";
+    logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+    QTextStream logStream(&logFile);
+    logStream<<output<<flush;
+    logFile.close();
+}
+//With GTD
+void MEX_Main::logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment, QString gtdString)
+{
+    QString output = date.currentDateTime().toString()+" - "+ordertype+" | "+productIndex+" | "+productsymbol+" | "+QString::number(quantity)+"@"+QString::number(value)+" | GTD: "+gtdString+" | Comment: "+comment+"\n";
     logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
     QTextStream logStream(&logFile);
     logStream<<output<<flush;
@@ -553,11 +620,13 @@ void MEX_Main::refreshTable()
                 //Set order ID if only user orders selected
                 if(selectedUsers == (*orderbookIterator).getTraderID())
                 {
+                    ui->tableWidgetOrderbookSell->setHorizontalHeaderItem(2,new QTableWidgetItem("Order ID"));
                     ui->tableWidgetOrderbookSell->setItem(newRow, 2,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getOrderID())));
                 }
                 else
                 {
-                    ui->tableWidgetOrderbookSell->setItem(newRow, 2,new MEX_TableWidgetItem(""));
+                    ui->tableWidgetOrderbookSell->setHorizontalHeaderItem(2,new QTableWidgetItem("GTD"));
+                    ui->tableWidgetOrderbookSell->setItem(newRow, 2,new QTableWidgetItem((*orderbookIterator).getGTD()));
                 }
                 ui->tableWidgetOrderbookSell->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getQuantity())));
                 ui->tableWidgetOrderbookSell->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getValue())));
@@ -591,11 +660,13 @@ void MEX_Main::refreshTable()
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 1,new QTableWidgetItem((*orderbookIterator).getProduct().getSymbol()));
                 if(selectedUsers == (*orderbookIterator).getTraderID())
                 {
+                    ui->tableWidgetOrderbookBuy->setHorizontalHeaderItem(2,new QTableWidgetItem("Order ID"));
                     ui->tableWidgetOrderbookBuy->setItem(newRow, 2,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getOrderID())));
                 }
                 else
                 {
-                    ui->tableWidgetOrderbookBuy->setItem(newRow, 2,new MEX_TableWidgetItem(""));
+                    ui->tableWidgetOrderbookBuy->setHorizontalHeaderItem(2,new QTableWidgetItem("GTD"));
+                    ui->tableWidgetOrderbookBuy->setItem(newRow, 2,new QTableWidgetItem((*orderbookIterator).getGTD()));
                 }
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 3,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getQuantity())));
                 ui->tableWidgetOrderbookBuy->setItem(newRow, 4,new MEX_TableWidgetItem(QString::number((*orderbookIterator).getValue())));
@@ -633,33 +704,36 @@ void MEX_Main::sortBuyTable(int column, Qt::SortOrder order)
 
 //Activate contextmenu
 void MEX_Main::customMenuRequested(QPoint pos){
-    //Set contextmenu for Buy Widget
-    if(ui->tableWidgetOrderbookBuy->selectedItems().length() == 1)
+    if(selectedUsers != "ALL")
     {
-        QModelIndex index=ui->tableWidgetOrderbookBuy->indexAt(pos);
+        //Set contextmenu for Buy Widget
+        if(this->focusWidget()->objectName() == "tableWidgetOrderbookBuy" && ui->tableWidgetOrderbookBuy->selectedItems().length() == 1)
+        {
+            QModelIndex index=ui->tableWidgetOrderbookBuy->indexAt(pos);
 
-        menu =new QMenu(this);
-        cancelOrderAction = new QAction("Cancel Order", this);
-        menu->addAction(cancelOrderAction);
-        menu->popup(ui->tableWidgetOrderbookBuy->viewport()->mapToGlobal(pos));
+            menu =new QMenu(this);
+            cancelOrderAction = new QAction(QIcon(QApplication::applicationDirPath() + "/cancel.png"),"Cancel Order", this);
+            menu->addAction(cancelOrderAction);
+            menu->popup(ui->tableWidgetOrderbookBuy->viewport()->mapToGlobal(pos));
 
-        currentItem = ui->tableWidgetOrderbookBuy->item(index.row(),index.column());///oder 2
+            currentItem = ui->tableWidgetOrderbookBuy->item(index.row(),index.column());
 
-        connect(cancelOrderAction, SIGNAL(triggered()), this, SLOT(cancelOrder()));
-    }
-    //Set contextmenu for Sell Widget
-    else if(ui->tableWidgetOrderbookSell->selectedItems().length() == 1)
-    {
-        QModelIndex index=ui->tableWidgetOrderbookSell->indexAt(pos);
+            connect(cancelOrderAction, SIGNAL(triggered()), this, SLOT(cancelOrder()));
+        }
+        //Set contextmenu for Sell Widget
+        else if(this->focusWidget()->objectName() == "tableWidgetOrderbookSell" && ui->tableWidgetOrderbookSell->selectedItems().length() == 1)
+        {
+            QModelIndex index=ui->tableWidgetOrderbookSell->indexAt(pos);
 
-        menu =new QMenu(this);
-        cancelOrderAction = new QAction("Cancel Order", this);
-        menu->addAction(cancelOrderAction);
-        menu->popup(ui->tableWidgetOrderbookSell->viewport()->mapToGlobal(pos));
+            menu =new QMenu(this);
+            cancelOrderAction = new QAction(QIcon(QApplication::applicationDirPath() + "/cancel.png"),"Cancel Order", this);
+            menu->addAction(cancelOrderAction);
+            menu->popup(ui->tableWidgetOrderbookSell->viewport()->mapToGlobal(pos));
 
-        currentItem = ui->tableWidgetOrderbookSell->item(index.row(),index.column());///oder 2
+            currentItem = ui->tableWidgetOrderbookSell->item(index.row(),index.column());
 
-        connect(cancelOrderAction, SIGNAL(triggered()), this, SLOT(cancelOrder()));
+            connect(cancelOrderAction, SIGNAL(triggered()), this, SLOT(cancelOrder()));
+        }
     }
 }
 

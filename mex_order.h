@@ -4,7 +4,6 @@
 #include <mex_product.h>
 #include <iostream>
 
-
 class MEX_Order
 {
 public:
@@ -24,6 +23,7 @@ public:
     MEX_Product getProduct();
     int getUpdated() const;
     bool isTradable() const;
+    QString getGTD();
 
     //Setter methods
     void setTraderID(QString);
@@ -36,6 +36,7 @@ public:
     void setTime(QDateTime);
     void setUpdated(int);
     void setTradable(bool);
+    void setGTD(QString gtd);
 
 private:
     QString traderID;
@@ -48,5 +49,6 @@ private:
     MEX_Product product;
     int updated;
     bool tradable;
+    QString gtd;
 };
 #endif //MEX_ORDER_H

@@ -20,6 +20,8 @@ public:
 
     void sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype);
 
+    void sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype, QString gtd);
+
     void requestOrderbook();
 
     QString readMessage();

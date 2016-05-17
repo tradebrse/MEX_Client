@@ -82,6 +82,54 @@ void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity
     }
 }
 
+void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype, QString gtd)
+{
+    //Write the XML to this socket
+    xmlWriter.setDevice(socket);
+    //Write start of document and set Order tag
+    xmlWriter.writeStartDocument();
+    xmlWriter.writeStartElement("Order");
+    //Write trader ID
+    xmlWriter.writeStartElement("Trader_ID");
+    xmlWriter.writeCharacters(traderID);
+    xmlWriter.writeEndElement();
+    //Write value data
+    xmlWriter.writeStartElement("Value");
+    xmlWriter.writeCharacters(QString::number(value));
+    xmlWriter.writeEndElement();
+    //Write quantity data
+    xmlWriter.writeStartElement("Quantity");
+    xmlWriter.writeCharacters(QString::number(quantity));
+    xmlWriter.writeEndElement();
+    //Write comment data
+    xmlWriter.writeStartElement("Comment");
+    xmlWriter.writeCharacters(comment);
+    xmlWriter.writeEndElement();
+    //Write product data
+    xmlWriter.writeStartElement("Product");
+    xmlWriter.writeCharacters(productsymbol);
+    xmlWriter.writeEndElement();
+    //Write ordertype data
+    xmlWriter.writeStartElement("Order_Type");
+    xmlWriter.writeCharacters(ordertype);
+    xmlWriter.writeEndElement();
+    //Write GTD data
+    xmlWriter.writeStartElement("GTD");
+    xmlWriter.writeCharacters(gtd);
+    xmlWriter.writeEndElement();
+    //Close tag Order
+    xmlWriter.writeEndElement();
+    //Close document
+    xmlWriter.writeEndDocument();
+
+    //Wait till order was sent
+    socket->waitForBytesWritten(100); ///Eventuell andere Zeit setzen - If msecs is -1, this function will not time out.
+    if(socket->bytesToWrite() > 0)
+    {
+        QMessageBox::warning(0,"Error","Could not send all data.");
+    }
+}
+
 void MEX_TCPClientSocket::requestOrderbook()
 {
     //Send empty order to give traderID information to server
@@ -223,6 +271,10 @@ void MEX_TCPClientSocket::readOrders(QList<MEX_Order>  &orderbook)
                     else if (xmlReader->name() == "Update")
                     {
                         order.setUpdated(xmlReader->readElementText().toInt());
+                    }
+                    else if (xmlReader->name() == "GTD")
+                    {
+                        order.setGTD(xmlReader->readElementText());
                     }
                 }
                 //Read next line

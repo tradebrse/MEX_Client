@@ -15,6 +15,7 @@ MEX_Order::MEX_Order(QString traderID, int orderID, double value, int quantity, 
     this->ordertype = ordertype;
     this->time = time;
     this->updated = 0;
+    this->gtd = "";
 }
 
 //Copy constructor
@@ -29,6 +30,7 @@ MEX_Order::MEX_Order(const MEX_Order &other)
     this->ordertype = other.ordertype;
     this->time = other.time;
     this->updated = other.updated;
+    this->gtd = other.gtd;
 }
 
 MEX_Order::~MEX_Order()
@@ -78,10 +80,15 @@ bool MEX_Order::isTradable() const
     return this->tradable;
 }
 
+QString MEX_Order::getGTD()
+{
+    return this->gtd;
+}
+
 //Setter methods
 void MEX_Order::setTraderID(QString traderID)
 {
-   this->traderID = traderID;
+    this->traderID = traderID;
 }
 void MEX_Order::setOrderID(int orderID)
 {
@@ -118,4 +125,8 @@ void MEX_Order::setUpdated(int updated)
 void MEX_Order::setTradable(bool tradable)
 {
     this->tradable = tradable;
+}
+void MEX_Order::setGTD(QString gtd)
+{
+    this->gtd = gtd;
 }

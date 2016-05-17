@@ -17,6 +17,7 @@
 #include <QRegExp>
 #include <QElapsedTimer>
 #include <QVBoxLayout>
+#include <QCalendarWidget>
 
 namespace Ui {
 class MEX_Main;
@@ -88,6 +89,8 @@ private slots:
 
     void logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment);
 
+    void logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment, QString gtdString);
+
     void clearTables();
 
     void intitializeLogFile();
@@ -95,6 +98,10 @@ private slots:
     void customMenuRequested(QPoint pos);
 
     void cancelOrder();
+
+    void openCalendarDialog(bool active);
+
+    void setGTD(QDate date);
 
 private:
     Ui::MEX_Main *ui;
@@ -157,6 +164,10 @@ private:
     QMenu *menu;
 
     QAction *cancelOrderAction;
+
+    QDialog *dialogGTD;
+
+    QCalendarWidget *calendar;
 
 protected:
 
