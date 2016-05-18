@@ -185,6 +185,7 @@ void MEX_Main::changeExchangeStatus(bool open)
     this->open = open;
     if(open)
     {
+
         ui->lblExchangeStatus->setStyleSheet("QLabel {color : green;}");
         ui->lblExchangeStatus->setText("Trading open");
     }
@@ -243,7 +244,14 @@ void MEX_Main::openAdminPanel()
     connect( this, SIGNAL(destroyed()), adminPanelWidget, SLOT(close()));
     connect(adminPanelWidget, SIGNAL(changeExchangeStatus(QByteArray)), tcpClientSocket, SLOT(writeRawData(QByteArray)));
     adminPanelWidget->show();
-    adminPanelWidget->setExchangeStatus(open);
+    if(open)
+    {
+        adminPanelWidget->setExchangeStatus(open);
+    }
+    else
+    {
+        adminPanelWidget->setExchangeStatus(false);
+    }
     this->setDisabled(true);
 }
 
