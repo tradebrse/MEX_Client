@@ -52,8 +52,6 @@ private:
 
     QString userID;
 
-    QCryptographicHash* hash;
-
     // SQL-DB //
     QSqlDatabase db;
 

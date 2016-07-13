@@ -1,3 +1,4 @@
+
 #include "mex_main.h"
 #include "ui_mex_main.h"
 
@@ -14,6 +15,9 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     //Set MEX Logo
     QPixmap pixMEX(QApplication::applicationDirPath() + "/mex1.png");
     ui->lblTradingGUI->setPixmap(pixMEX);
+
+    //Set server date
+    serverDate = QDate::currentDate();
 
     //Set checked buttons for application start
     ui->radioButtonBuy->setChecked(true);
@@ -46,6 +50,10 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     connect(ui->tableWidgetOrderbookSell, SIGNAL(customContextMenuRequested(QPoint)),SLOT(customMenuRequested(QPoint)));
     layout->addWidget(ui->tableWidgetOrderbookBuy);
     layout->addWidget(ui->tableWidgetOrderbookSell);
+    currentItem = NULL;
+    //cancelOrderAction = NULL;
+    //dialogGTD = NULL;
+    //calendar = NULL;
 
     //Delete main window when closed on logout
     this->setAttribute(Qt::WA_DeleteOnClose);
@@ -111,12 +119,18 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
 
     //Start connection
     tcpClientSocket->doConnect();
+
 }
 
 MEX_Main::~MEX_Main()
 {
     closeDB();
+    tcpClientSocket->doDisconnect();
     delete ui;
+    if(tcpClientSocket)
+        delete tcpClientSocket;
+    if(currentItem)
+        delete currentItem;
 }
 
 //Connect to server
@@ -153,6 +167,8 @@ void MEX_Main::changeToDisconnected()
 
 void MEX_Main::openCalendarDialog(bool active)
 {
+    QDialog *dialogGTD = NULL;
+    QCalendarWidget *calendar = NULL;
     if(active)
     {
         dialogGTD = new QDialog(this);
@@ -168,8 +184,6 @@ void MEX_Main::openCalendarDialog(bool active)
     }
     else
     {
-        delete calendar;
-        delete dialogGTD;
         ui->edtDate->setText("");
     }
 }
@@ -430,7 +444,7 @@ void MEX_Main::on_btnExecute_clicked()
     }
 }
 
-//Gather trade information and send over tcp client
+//Gather trade information from GUI and send over tcp client
 void MEX_Main::executeOrder()
 {
 
@@ -481,31 +495,37 @@ void MEX_Main::executeOrder()
         }
     }
 
+    //If valid GTD Date is selected
     if(valueRegEx.exactMatch(ui->edtValue->text().replace(",",".")) && quantityRegEx.exactMatch(ui->edtQuantity->text()) && dateValid && isConnected)
     {
         double value = ui->edtValue->text().replace(",",".").toDouble();
         int quantity = ui->edtQuantity->text().toInt();
         QString comment = ui->edtComment->text();
         QString stringGTD = ui->edtDate->text();
+        bool persistent = ui->cBoxPersistent->isChecked();
 
-        logOrder(ordertype, productIndex, productSymbol, quantity, value, comment, stringGTD);
+        logOrder(ordertype, productIndex, productSymbol, quantity, value, comment, stringGTD, persistent);
 
-        tcpClientSocket->sendOrder(traderID, value, quantity, comment, productSymbol, ordertype, stringGTD);
+        tcpClientSocket->sendOrder(traderID, value, quantity, comment, productSymbol, ordertype, stringGTD, persistent);
     }
+    //If GTD is not selected
     else if(valueRegEx.exactMatch(ui->edtValue->text().replace(",",".")) && quantityRegEx.exactMatch(ui->edtQuantity->text()) && !ui->cBoxGTD->isChecked() && isConnected)
     {
         double value = ui->edtValue->text().replace(",",".").toDouble();
         int quantity = ui->edtQuantity->text().toInt();
         QString comment = ui->edtComment->text();
+        bool persistent = ui->cBoxPersistent->isChecked();
 
-        logOrder(ordertype, productIndex, productSymbol, quantity, value, comment);
+        logOrder(ordertype, productIndex, productSymbol, quantity, value, comment, persistent);
 
-        tcpClientSocket->sendOrder(traderID, value, quantity, comment, productSymbol, ordertype);
+        tcpClientSocket->sendOrder(traderID, value, quantity, comment, productSymbol, ordertype, persistent);
     }
+    //If value is invalid
     else if(!valueRegEx.exactMatch(ui->edtValue->text()))
     {
         QMessageBox::information(0,"Invalid input","Inavlid value.");
     }
+    //If quantity is invalid
     else if(!quantityRegEx.exactMatch(ui->edtQuantity->text()))
     {
         QMessageBox::information(0,"Invalid input","Invalid quantity.");
@@ -528,18 +548,22 @@ void MEX_Main::intitializeLogFile()
 }
 
 //Write Order to user logfile
-void MEX_Main::logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment)
+void MEX_Main::logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment, bool persistent)
 {
-    QString output = date.currentDateTime().toString()+" - "+ordertype+" | "+productIndex+" | "+productsymbol+" | "+QString::number(quantity)+"@"+QString::number(value)+" | Comment: "+comment+"\n";
+    QString persistentStr = "Persistent";
+    if(!persistent) persistentStr = "Non-Persistent";
+    QString output = date.currentDateTime().toString()+" - "+ordertype+" | "+productIndex+" | "+productsymbol+" | "+QString::number(quantity)+"@"+QString::number(value)+" | "+persistentStr+" | Comment: "+comment+"\n";
     logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
     QTextStream logStream(&logFile);
     logStream<<output<<flush;
     logFile.close();
 }
 //With GTD
-void MEX_Main::logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment, QString gtdString)
+void MEX_Main::logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment, QString gtdString, bool persistent)
 {
-    QString output = date.currentDateTime().toString()+" - "+ordertype+" | "+productIndex+" | "+productsymbol+" | "+QString::number(quantity)+"@"+QString::number(value)+" | GTD: "+gtdString+" | Comment: "+comment+"\n";
+    QString persistentStr = "Persistent";
+    if(!persistent) persistentStr = "Non-Persistent";
+    QString output = date.currentDateTime().toString()+" - "+ordertype+" | "+productIndex+" | "+productsymbol+" | "+QString::number(quantity)+"@"+QString::number(value)+" | GTD: "+gtdString+" | "+persistentStr+" | Comment: "+comment+"\n";
     logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
     QTextStream logStream(&logFile);
     logStream<<output<<flush;
@@ -581,15 +605,22 @@ void MEX_Main::on_btnShow_clicked()
 
 void MEX_Main::clearTables()
 {
-    //Remove all current rows from tablewidget
-    while (ui->tableWidgetOrderbookSell->rowCount() > 0)
+    if(ui->tableWidgetOrderbookSell->verticalHeader()->count() > 0)
     {
-        ui->tableWidgetOrderbookSell->removeRow(0);
+        ui->tableWidgetOrderbookSell->model()->blockSignals(true);
+
+        ui->tableWidgetOrderbookSell->model()->removeRows(0, ui->tableWidgetOrderbookSell->verticalHeader()->count());
+
+        ui->tableWidgetOrderbookSell->model()->blockSignals(false);
     }
-    //Remove all current rows from tablewidget
-    while (ui->tableWidgetOrderbookBuy->rowCount() > 0)
+
+    if(ui->tableWidgetOrderbookBuy->verticalHeader()->count() > 0)
     {
-        ui->tableWidgetOrderbookBuy->removeRow(0);
+        ui->tableWidgetOrderbookBuy->model()->blockSignals(true);
+
+        ui->tableWidgetOrderbookBuy->model()->removeRows(0,  ui->tableWidgetOrderbookBuy->verticalHeader()->count());
+
+        ui->tableWidgetOrderbookBuy->model()->blockSignals(false);
     }
 }
 
@@ -712,6 +743,8 @@ void MEX_Main::sortBuyTable(int column, Qt::SortOrder order)
 
 //Activate contextmenu
 void MEX_Main::customMenuRequested(QPoint pos){
+    QMenu* menu = NULL;
+    QAction* cancelOrderAction = NULL;
     if(selectedUsers != "ALL")
     {
         //Set contextmenu for Buy Widget

@@ -16,11 +16,13 @@ class MEX_TCPClientSocket : public QObject
 public:
     explicit MEX_TCPClientSocket(QString traderID, QObject *parent = 0);
 
+    ~MEX_TCPClientSocket();
+
     void doConnect();
 
-    void sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype);
+    void sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype, bool persistent);
 
-    void sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype, QString gtd);
+    void sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype, QString gtd, bool persistent);
 
     void requestOrderbook();
 
@@ -38,8 +40,8 @@ public slots:
 private slots:
     void readOrders(QList<MEX_Order>& orderbook);
 private:
-    QTcpSocket *socket;
-    QXmlStreamWriter xmlWriter;
+    QTcpSocket* socket;
+    QXmlStreamWriter* xmlWriter;
     QXmlStreamReader* xmlReader;
     MEX_Order order;
     QString traderID;

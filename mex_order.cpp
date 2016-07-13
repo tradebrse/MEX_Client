@@ -16,6 +16,7 @@ MEX_Order::MEX_Order(QString traderID, int orderID, double value, int quantity, 
     this->time = time;
     this->updated = 0;
     this->gtd = "";
+    this->persistent = false; /// Ändern zu konstrutktor wert!!
 }
 
 //Copy constructor
@@ -31,6 +32,7 @@ MEX_Order::MEX_Order(const MEX_Order &other)
     this->time = other.time;
     this->updated = other.updated;
     this->gtd = other.gtd;
+    this->persistent = other.persistent;
 }
 
 MEX_Order::~MEX_Order()
@@ -85,6 +87,11 @@ QString MEX_Order::getGTD()
     return this->gtd;
 }
 
+bool MEX_Order::isPersistent() const
+{
+    return this->persistent;
+}
+
 //Setter methods
 void MEX_Order::setTraderID(QString traderID)
 {
@@ -129,4 +136,9 @@ void MEX_Order::setTradable(bool tradable)
 void MEX_Order::setGTD(QString gtd)
 {
     this->gtd = gtd;
+}
+
+void MEX_Order::setPersistent(bool persistent)
+{
+    this->persistent = persistent;
 }

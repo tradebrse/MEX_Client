@@ -52,7 +52,6 @@ private:
 
     QString userID;
 
-    QCryptographicHash* hash;
 };
 
 #endif // MEX_MYACCOUNT_H

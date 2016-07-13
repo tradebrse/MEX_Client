@@ -6,6 +6,13 @@ MEX_TCPClientSocket::MEX_TCPClientSocket(QString traderID, QObject *parent) :
     this->traderID = traderID;
 }
 
+MEX_TCPClientSocket::~MEX_TCPClientSocket()
+{
+    delete socket;
+    delete xmlReader;
+    delete xmlWriter;
+}
+
 void MEX_TCPClientSocket::doConnect()
 {
     socket = new QTcpSocket(this);
@@ -16,7 +23,10 @@ void MEX_TCPClientSocket::doConnect()
 
     socket->connectToHost("127.0.0.1", 1234);
 
-    xmlWriter.setAutoFormatting(true);
+    //Write the XML to this socket
+    xmlWriter = new QXmlStreamWriter(socket);
+    xmlWriter->setAutoFormatting(true);
+
     if(socket->waitForConnected(10000)){
         emit clientConnected();
         //Request orderbook and send trader ID
@@ -38,41 +48,45 @@ void MEX_TCPClientSocket::writeRawData(QByteArray data)
     }
 }
 
-void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype)
+void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype, bool persistent)
 {
     //Write the XML to this socket
-    xmlWriter.setDevice(socket);
+   // xmlWriter.setDevice(socket);
     //Write start of document and set Order tag
-    xmlWriter.writeStartDocument();
-    xmlWriter.writeStartElement("Order");
+    xmlWriter->writeStartDocument();
+    xmlWriter->writeStartElement("Order");
     //Write trader ID
-    xmlWriter.writeStartElement("Trader_ID");
-    xmlWriter.writeCharacters(traderID);
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Trader_ID");
+    xmlWriter->writeCharacters(traderID);
+    xmlWriter->writeEndElement();
     //Write value data
-    xmlWriter.writeStartElement("Value");
-    xmlWriter.writeCharacters(QString::number(value));
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Value");
+    xmlWriter->writeCharacters(QString::number(value));
+    xmlWriter->writeEndElement();
     //Write quantity data
-    xmlWriter.writeStartElement("Quantity");
-    xmlWriter.writeCharacters(QString::number(quantity));
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Quantity");
+    xmlWriter->writeCharacters(QString::number(quantity));
+    xmlWriter->writeEndElement();
     //Write comment data
-    xmlWriter.writeStartElement("Comment");
-    xmlWriter.writeCharacters(comment);
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Comment");
+    xmlWriter->writeCharacters(comment);
+    xmlWriter->writeEndElement();
     //Write product data
-    xmlWriter.writeStartElement("Product");
-    xmlWriter.writeCharacters(productsymbol);
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Product");
+    xmlWriter->writeCharacters(productsymbol);
+    xmlWriter->writeEndElement();
     //Write ordertype data
-    xmlWriter.writeStartElement("Order_Type");
-    xmlWriter.writeCharacters(ordertype);
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Order_Type");
+    xmlWriter->writeCharacters(ordertype);
+    xmlWriter->writeEndElement();
+    //Write Persistence data
+    xmlWriter->writeStartElement("Persistent");
+    xmlWriter->writeCharacters(QString::number(persistent));
+    xmlWriter->writeEndElement();
     //Close tag Order
-    xmlWriter.writeEndElement();
+    xmlWriter->writeEndElement();
     //Close document
-    xmlWriter.writeEndDocument();
+    xmlWriter->writeEndDocument();
 
     //Wait till order was sent
     socket->waitForBytesWritten(100); ///Eventuell andere Zeit setzen - If msecs is -1, this function will not time out.
@@ -82,45 +96,49 @@ void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity
     }
 }
 
-void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype, QString gtd)
+void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity, QString comment, QString productsymbol, QString ordertype, QString gtd, bool persistent)
 {
     //Write the XML to this socket
-    xmlWriter.setDevice(socket);
+    //xmlWriter.setDevice(socket);
     //Write start of document and set Order tag
-    xmlWriter.writeStartDocument();
-    xmlWriter.writeStartElement("Order");
+    xmlWriter->writeStartDocument();
+    xmlWriter->writeStartElement("Order");
     //Write trader ID
-    xmlWriter.writeStartElement("Trader_ID");
-    xmlWriter.writeCharacters(traderID);
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Trader_ID");
+    xmlWriter->writeCharacters(traderID);
+    xmlWriter->writeEndElement();
     //Write value data
-    xmlWriter.writeStartElement("Value");
-    xmlWriter.writeCharacters(QString::number(value));
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Value");
+    xmlWriter->writeCharacters(QString::number(value));
+    xmlWriter->writeEndElement();
     //Write quantity data
-    xmlWriter.writeStartElement("Quantity");
-    xmlWriter.writeCharacters(QString::number(quantity));
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Quantity");
+    xmlWriter->writeCharacters(QString::number(quantity));
+    xmlWriter->writeEndElement();
     //Write comment data
-    xmlWriter.writeStartElement("Comment");
-    xmlWriter.writeCharacters(comment);
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Comment");
+    xmlWriter->writeCharacters(comment);
+    xmlWriter->writeEndElement();
     //Write product data
-    xmlWriter.writeStartElement("Product");
-    xmlWriter.writeCharacters(productsymbol);
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Product");
+    xmlWriter->writeCharacters(productsymbol);
+    xmlWriter->writeEndElement();
     //Write ordertype data
-    xmlWriter.writeStartElement("Order_Type");
-    xmlWriter.writeCharacters(ordertype);
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("Order_Type");
+    xmlWriter->writeCharacters(ordertype);
+    xmlWriter->writeEndElement();
     //Write GTD data
-    xmlWriter.writeStartElement("GTD");
-    xmlWriter.writeCharacters(gtd);
-    xmlWriter.writeEndElement();
+    xmlWriter->writeStartElement("GTD");
+    xmlWriter->writeCharacters(gtd);
+    xmlWriter->writeEndElement();
+    //Write Persistence data
+    xmlWriter->writeStartElement("Persistent");
+    xmlWriter->writeCharacters(QString::number(persistent));
+    xmlWriter->writeEndElement();
     //Close tag Order
-    xmlWriter.writeEndElement();
+    xmlWriter->writeEndElement();
     //Close document
-    xmlWriter.writeEndDocument();
+    xmlWriter->writeEndDocument();
 
     //Wait till order was sent
     socket->waitForBytesWritten(100); ///Eventuell andere Zeit setzen - If msecs is -1, this function will not time out.
@@ -133,7 +151,7 @@ void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity
 void MEX_TCPClientSocket::requestOrderbook()
 {
     //Send empty order to give traderID information to server
-    sendOrder(this->traderID,0,0,"","","");
+    sendOrder(this->traderID,0,0,"","","", false);
 }
 
 

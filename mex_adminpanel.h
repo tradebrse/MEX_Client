@@ -84,8 +84,6 @@ private:
 
     QStringList productIndexList;
 
-    QCryptographicHash* hash;
-
     bool open;
 };
 

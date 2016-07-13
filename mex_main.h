@@ -87,9 +87,9 @@ private slots:
 
     void sortBuyTable(int column, Qt::SortOrder order);
 
-    void logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment);
+    void logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment, bool persistent);
 
-    void logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment, QString gtdString);
+    void logOrder(QString ordertype, QString productIndex, QString productsymbol, int quantity, double value, QString comment, QString gtdString, bool persistent);
 
     void clearTables();
 
@@ -159,15 +159,9 @@ private:
 
     bool open;
 
-    QTableWidgetItem * currentItem;
+    QTableWidgetItem *currentItem;
 
-    QMenu *menu;
-
-    QAction *cancelOrderAction;
-
-    QDialog *dialogGTD;
-
-    QCalendarWidget *calendar;
+    QDate serverDate;
 
 protected:
 

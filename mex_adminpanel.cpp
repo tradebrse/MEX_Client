@@ -349,7 +349,7 @@ void MEX_AdminPanel::addProduct()
 
 QString MEX_AdminPanel::encrypt(QString clearPass)
 {
-    QByteArray result = hash->hash(clearPass.toUtf8(),QCryptographicHash::Md5);
+    QByteArray result = QCryptographicHash::hash(clearPass.toUtf8(),QCryptographicHash::Md5);
     return result.toHex();
 }
 

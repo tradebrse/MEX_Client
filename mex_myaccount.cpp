@@ -150,6 +150,9 @@ void MEX_MyAccount::closeDB()
 
 QString MEX_MyAccount::encrypt(QString clearPass)
 {
-    QByteArray result = hash->hash(clearPass.toUtf8(),QCryptographicHash::Md5);
+   // hash = new QCryptographicHash();
+   // hash =  QCryptographicHash::hash(clearPass.toUtf8(),QCryptographicHash::Md5);
+    //QByteArray result = hash->hash(clearPass.toUtf8(),QCryptographicHash::Md5);
+    QByteArray result = QCryptographicHash::hash(clearPass.toUtf8(),QCryptographicHash::Md5);
     return result.toHex();
 }

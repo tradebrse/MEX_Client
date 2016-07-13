@@ -24,6 +24,7 @@ public:
     int getUpdated() const;
     bool isTradable() const;
     QString getGTD();
+    bool isPersistent() const;
 
     //Setter methods
     void setTraderID(QString);
@@ -37,6 +38,7 @@ public:
     void setUpdated(int);
     void setTradable(bool);
     void setGTD(QString gtd);
+    void setPersistent(bool persistent);
 
 private:
     QString traderID;
@@ -50,5 +52,6 @@ private:
     int updated;
     bool tradable;
     QString gtd;
+    bool persistent;
 };
 #endif //MEX_ORDER_H
