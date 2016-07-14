@@ -22,6 +22,7 @@ public:
     explicit MEX_AdminPanel(QWidget *parent = 0); //QWidget *parent = 0
     ~MEX_AdminPanel();
 
+public slots:
     void setExchangeStatus(bool open);
 
 signals:

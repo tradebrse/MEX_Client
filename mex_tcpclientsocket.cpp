@@ -89,7 +89,7 @@ void MEX_TCPClientSocket::sendOrder(QString traderID, double value, int quantity
     xmlWriter->writeEndDocument();
 
     //Wait till order was sent
-    socket->waitForBytesWritten(100); ///Eventuell andere Zeit setzen - If msecs is -1, this function will not time out.
+    socket->waitForBytesWritten(100); //-> was '-1' before -> If msecs is -1, this function should not time out.
     if(socket->bytesToWrite() > 0)
     {
         QMessageBox::warning(0,"Error","Could not send all data.");
@@ -176,6 +176,7 @@ void MEX_TCPClientSocket::readServerData()
     }
 
     QString dataString = QString(data);
+
     if(dataString.left(3) == "SOD")
     {
         emit exchangeStatusChanged(true);

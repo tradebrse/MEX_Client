@@ -257,6 +257,7 @@ void MEX_Main::openAdminPanel()
     connect( adminPanelWidget, SIGNAL(destroyed()), this, SLOT(readProductDB()));
     connect( this, SIGNAL(destroyed()), adminPanelWidget, SLOT(close()));
     connect(adminPanelWidget, SIGNAL(changeExchangeStatus(QByteArray)), tcpClientSocket, SLOT(writeRawData(QByteArray)));
+    connect(tcpClientSocket, SIGNAL(exchangeStatusChanged(bool)),adminPanelWidget, SLOT(setExchangeStatus(bool)));
     adminPanelWidget->show();
     if(open)
     {
