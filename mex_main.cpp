@@ -51,9 +51,6 @@ MEX_Main::MEX_Main(QString userID, QWidget *parent) :
     layout->addWidget(ui->tableWidgetOrderbookBuy);
     layout->addWidget(ui->tableWidgetOrderbookSell);
     currentItem = NULL;
-    //cancelOrderAction = NULL;
-    //dialogGTD = NULL;
-    //calendar = NULL;
 
     //Delete main window when closed on logout
     this->setAttribute(Qt::WA_DeleteOnClose);
@@ -536,9 +533,25 @@ void MEX_Main::executeOrder()
 //Send the cancel order to the server
 void MEX_Main::cancelOrder()
 {
-    if(currentItem->isSelected() && currentItem->tableWidget()->item(currentItem->row(),2)->text().toInt() > 0)
+    if(this->isConnected && ui->lblExchangeStatus->text() == "Trading open")
     {
-        tcpClientSocket->writeRawData(("Cancel_"+currentItem->tableWidget()->item(currentItem->row(),2)->text()).toUtf8());
+        if(currentItem->isSelected() && currentItem->tableWidget()->item(currentItem->row(),2)->text().toInt() > 0)
+        {
+            tcpClientSocket->writeRawData(("Cancel_"+currentItem->tableWidget()->item(currentItem->row(),2)->text()).toUtf8());
+            currentItem = NULL;
+        }
+        else
+        {
+             QMessageBox::information(0,"Execution failed","No valid order selected.");
+        }
+    }
+    else if(!this->isConnected)
+    {
+        QMessageBox::information(0,"Execution failed","The client is not connected to the server.");
+    }
+    else if(this->isConnected && ui->lblExchangeStatus->text() == "Trading closed")
+    {
+        QMessageBox::information(0,"Execution failed","The exchange is currently closed");
     }
 }
 
